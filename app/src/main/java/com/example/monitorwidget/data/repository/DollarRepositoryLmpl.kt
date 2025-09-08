@@ -1,11 +1,12 @@
-package com.example.monitorwidget.ui.theme.domain.model.repository
+package com.example.monitorwidget.data.repository
 
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.monitorwidget.data.remote.DollarApiService
 import com.example.monitorwidget.data.remote.local.datastore.DollarDataStore
-import com.example.monitorwidget.ui.theme.domain.model.DollarRates
+import com.example.monitorwidget.domain.model.DollarRates
+import com.example.monitorwidget.domain.repository.DollarRepository
 import java.time.Instant
 
 class DollarRepositoryImpl(
@@ -18,19 +19,15 @@ class DollarRepositoryImpl(
         return try {
             val ratesList = api.getDolarRates()
             Log.e("MonitorWrket", "error ")
-
-            val usdt = ratesList.find { it.fuente == "bitcoin" }?.promedio
+	        
             val bcv = ratesList.find { it.fuente == "oficial" }?.promedio
-            val paralelo = ratesList.find { it.fuente == "paralelo" }?.promedio
 
-            if (usdt == null || bcv == null || paralelo == null) {
+            if (bcv == null) {
                 throw Exception("No se encontraron todas las tasas")
             }
 
             val rates = DollarRates(
-                usdt = usdt,
                 bcv = bcv,
-                promedio = paralelo,
                 timestamp = Instant.now().epochSecond
             )
 

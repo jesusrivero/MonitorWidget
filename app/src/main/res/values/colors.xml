@@ -1,16 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Light theme -->
+    <!-- Colores principales de la app financiera -->
+    <color name="financial_green">#10B981</color>
+    <color name="financial_green_dark">#059669</color>
+    <color name="financial_blue">#3B82F6</color>
+    <color name="financial_blue_dark">#1E40AF</color>
+    <color name="financial_orange">#F59E0B</color>
+    <color name="financial_red">#EF4444</color>
 
-    <color name="widget_surface">#F5F5F5</color>
-    <color name="widget_on_surface">#212121</color>
-    <!-- Dark theme -->
-    <color name="widget_primary_dark">#00E676</color> <!-- Green A400 -->
-    <color name="widget_on_primary_dark">#000000</color>
-    <color name="widget_surface_dark">#121212</color>
-    <color name="widget_on_surface_dark">#FFFFFF</color>
-    <color name="widget_primary">#3F51B5</color>
+    <!-- Theme Light -->
+    <color name="widget_primary">#10B981</color>
     <color name="widget_on_primary">#FFFFFF</color>
-    <color name="widget_error">#D32F2F</color>
+    <color name="widget_primary_container">#DCFCE7</color>
+    <color name="widget_on_primary_container">#059669</color>
 
+    <color name="widget_secondary">#3B82F6</color>
+    <color name="widget_on_secondary">#FFFFFF</color>
+    <color name="widget_secondary_container">#DBEAFE</color>
+    <color name="widget_on_secondary_container">#1E40AF</color>
+
+    <color name="widget_surface">#FAFAFA</color>
+    <color name="widget_on_surface">#171717</color>
+    <color name="widget_surface_variant">#F5F5F5</color>
+    <color name="widget_on_surface_variant">#6B7280</color>
+
+    <color name="widget_background">#FFFFFF</color>
+    <color name="widget_on_background">#171717</color>
+
+    <color name="widget_error">#EF4444</color>
+    <color name="widget_on_error">#FFFFFF</color>
+    <color name="widget_error_container">#FEE2E2</color>
+    <color name="widget_on_error_container">#7F1D1D</color>
+
+    <!-- Theme Dark -->
+    <color name="widget_primary_dark">#10B981</color>
+    <color name="widget_on_primary_dark">#000000</color>
+    <color name="widget_primary_container_dark">#059669</color>
+    <color name="widget_on_primary_container_dark">#FFFFFF</color>
+
+    <color name="widget_secondary_dark">#3B82F6</color>
+    <color name="widget_on_secondary_dark">#FFFFFF</color>
+    <color name="widget_secondary_container_dark">#1E40AF</color>
+    <color name="widget_on_secondary_container_dark">#FFFFFF</color>
+
+    <color name="widget_surface_dark">#262626</color>
+    <color name="widget_on_surface_dark">#FFFFFF</color>
+    <color name="widget_surface_variant_dark">#374151</color>
+    <color name="widget_on_surface_variant_dark">#E5E7EB</color>
+
+    <color name="widget_background_dark">#171717</color>
+    <color name="widget_on_background_dark">#FFFFFF</color>
+
+    <color name="widget_error_dark">#EF4444</color>
+    <color name="widget_on_error_dark">#FFFFFF</color>
+    <color name="widget_error_container_dark">#7F1D1D</color>
+    <color name="widget_on_error_container_dark">#FFFFFF</color>
+
+    <!-- Utility colors -->
+    <color name="success_green">#10B981</color>
+    <color name="bcv_blue">#3B82F6</color>
+    <color name="paralelo_green">#059669</color>
+    <color name="warning_orange">#F59E0B</color>
+    <color name="neutral_gray">#6B7280</color>
+
+    <!-- Widget específicos -->
+    <color name="widget_border_light">#E5E5E5</color>
+    <color name="widget_border_dark">#374151</color>
+    <color name="widget_divider_light">#D1D5DB</color>
+    <color name="widget_divider_dark">#4B5563</color>
+
+    <!-- Estados -->
+    <color name="rate_up">#10B981</color>      <!-- Verde para subidas -->
+    <color name="rate_down">#EF4444</color>    <!-- Rojo para bajadas -->
+    <color name="rate_neutral">#6B7280</color> <!-- Gris para sin cambios -->
+
+    <!-- Transparencias -->
+    <color name="overlay_light">#F5F5F5CC</color>   <!-- 80% opacity -->
+    <color name="overlay_dark">#171717CC</color>     <!-- 80% opacity -->
+    <color name="card_elevation_light">#00000008</color>  <!-- Sombra sutil -->
+    <color name="card_elevation_dark">#00000020</color>    <!-- Sombra más pronunciada -->
 </resources>

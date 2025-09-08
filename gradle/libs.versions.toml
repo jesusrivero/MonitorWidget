@@ -1,33 +1,58 @@
 [versions]
+activityComposeVersion = "1.9.1"
 agp = "8.10.1"
+charty = "1.0.0"
 converterMoshi = "2.9.0"
+coreKtxVersion = "1.13.1"
+coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.7"
 glanceAppwidget = "1.1.1"
+hiltAndroid = "2.52"
+hiltCompiler = "2.52"
+hiltNavigationCompose = "1.2.0"
+#hiltNavigationComposeVersion = "1.1.0"
+hiltNavigationComposeVersion = "1.2.0"
+javapoet = "0.5.0"
+javaxInject = "1"
 kotlin = "2.0.21"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
+kotlinxSerializationJson = "1.8.0"
 lifecycleRuntimeKtx = "2.9.1"
 activityCompose = "1.10.1"
 composeBom = "2024.09.00"
-moshi = "1.14.0"
+lifecycleRuntimeKtxVersion = "2.8.4"
+materialIconsExtended = "<compose_version>"
+moshi = "1.15.1"
 moshiKotlin = "1.15.0"
 moshiKotlinCodegen = "1.15.0"
-moshiVersion = "1.14.0"
+moshiKotlinCodegenVersion = "1.15.1"
+moshiVersion = "1.15.0"
 retrofit = "2.9.0"
-wordRuntimeKtx = "2.9.0"
-compiler = "3.2.0-alpha11"
 workRuntimeKtx = "2.10.1"
 workRuntimeKtxVersion = "2.9.0"
+navigationComposeAndroid = "2.9.3"
 
 [libraries]
+
+
+androidx-activity-compose-v191 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
+androidx-core-ktx-v1131 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationComposeVersion" }
+androidx-lifecycle-runtime-ktx-v284 = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtxVersion" }
+androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glanceAppwidget" }
-androidx-word-runtime-ktx = { module = "androidx.word:word-runtime-ktx", version.ref = "wordRuntimeKtx" }
-androidx-work-runtime-ktx-v290 = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtxVersion" }
+
+charty = { module = "com.github.tehras:charty", version.ref = "charty" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
+javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -41,15 +66,21 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
 moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshiKotlin" }
 moshi-kotlin-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshiKotlinCodegen" }
+moshi-kotlin-codegen-v1151 = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshiKotlinCodegenVersion" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
-androidx-compiler = { group = "androidx.databinding", name = "compiler", version.ref = "compiler" }
-androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
+
+
+
 squareup-moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshiVersion" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationComposeAndroid" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 
 [plugins]
+jetbrainsKotlinSerialization = {id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

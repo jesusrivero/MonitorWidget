@@ -1,4 +1,4 @@
-package com.example.monitorwidget.ui.theme
+package com.example.monitorwidget.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

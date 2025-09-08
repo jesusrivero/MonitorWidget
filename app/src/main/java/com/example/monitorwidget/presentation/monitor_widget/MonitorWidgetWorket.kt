@@ -16,8 +16,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkerParameters
 import com.example.monitorwidget.data.remote.RetrofitClient
 import com.example.monitorwidget.data.remote.local.datastore.DollarDataStore
-import com.example.monitorwidget.ui.theme.domain.model.repository.DollarRepositoryImpl
-import com.example.monitorwidget.ui.theme.domain.model.usecase.GetDollarRatesUseCase
+import com.example.monitorwidget.data.repository.DollarRepositoryImpl
+import com.example.monitorwidget.domain.usecase.GetDollarRatesUseCase
+import com.example.monitorwidget.presentation.ui.MonitorGlanceWidget
 import java.util.concurrent.TimeUnit
 
 
@@ -36,7 +37,7 @@ class MonitorWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             val useCase = GetDollarRatesUseCase(repository)
             val rates = useCase() // llama al invoke
 
-            Log.d("MonitorWorker", "Datos recibidos: usdt=${rates.usdt}, bcv=${rates.bcv}, promedio=${rates.promedio}, timestamp=${rates.timestamp}")
+            Log.d("MonitorWorker", "Datos recibidos: bcv=${rates.bcv}, timestamp=${rates.timestamp}")
 
             val glanceIds = GlanceAppWidgetManager(applicationContext)
                 .getGlanceIds(MonitorGlanceWidget::class.java)

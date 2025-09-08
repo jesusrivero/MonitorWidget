@@ -1,11 +1,16 @@
 package com.example.monitorwidget.infraestructure.di
 
 import android.content.Context
+import androidx.room.Room
+import com.example.monitorwidget.data.local.AppDatabase
+import com.example.monitorwidget.data.local.FavoriteAmountDao
 import com.example.monitorwidget.data.preferences.ThemeDataStore
 import com.example.monitorwidget.data.remote.DollarApiService
 import com.example.monitorwidget.data.remote.local.datastore.DollarDataStore
 import com.example.monitorwidget.domain.repository.DollarRepository
 import com.example.monitorwidget.data.repository.DollarRepositoryImpl
+import com.example.monitorwidget.data.repository.FavoriteAmountRepositoryImpl
+import com.example.monitorwidget.domain.repository.FavoriteAmountRepository
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -64,5 +69,27 @@ object AppModule {
 	fun provideThemeDataStore(@ApplicationContext context: Context): ThemeDataStore {
 		return ThemeDataStore(context)
 	}
+	
+	
+	@Provides
+	@Singleton
+	fun provideDatabase(
+		@ApplicationContext context: Context
+	): AppDatabase =
+		Room.databaseBuilder(
+			context,
+			AppDatabase::class.java,
+			"app_database"
+		).build()
+	
+	@Provides
+	fun provideFavoriteAmountDao(db: AppDatabase): FavoriteAmountDao =
+		db.favoriteAmountDao()
+	
+	@Provides
+	@Singleton
+	fun provideFavoriteAmountRepository(
+		dao: FavoriteAmountDao
+	): FavoriteAmountRepository = FavoriteAmountRepositoryImpl(dao)
 	
 }

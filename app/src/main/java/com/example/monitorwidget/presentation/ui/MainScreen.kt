@@ -125,6 +125,7 @@ fun DollarCalculatorScreen(
 	val context = LocalContext.current
 	val activity = context as Activity
 	
+	
 	DrawerScaffold(
 		currentRoute = NavigationRoute.CALCULATOR,
 		navController = navController,

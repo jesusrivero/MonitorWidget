@@ -31,12 +31,16 @@ moshiKotlinCodegen = "1.15.0"
 moshiKotlinCodegenVersion = "1.15.1"
 moshiVersion = "1.15.0"
 retrofit = "2.9.0"
+roomKtx = "2.7.2"
+room = "2.7.2"
+roomRuntime = "2.7.2"
+roomTesting = "2.7.2"
 workRuntimeKtx = "2.10.1"
 workRuntimeKtxVersion = "2.9.0"
 navigationComposeAndroid = "2.9.3"
 
 [libraries]
-
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 
 androidx-activity-compose-v191 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
 androidx-core-ktx-v1131 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
@@ -48,6 +52,9 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glanceAppwidget" }
 
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "roomTesting" }
 charty = { module = "com.github.tehras:charty", version.ref = "charty" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }

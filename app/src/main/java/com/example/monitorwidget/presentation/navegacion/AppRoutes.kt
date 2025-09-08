@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 object AppRoutes {
 	
 	@Serializable
-	data object LiveRatesScreen
+	data object FavoriteScreen
 	
 	@Serializable
 	data object DollarCalculatorScreen

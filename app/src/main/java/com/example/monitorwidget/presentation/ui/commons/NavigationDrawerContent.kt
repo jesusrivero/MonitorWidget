@@ -217,7 +217,7 @@ fun DrawerScaffold(
 								}
 								
 								NavigationRoute.LIVE_RATES -> {
-									navController.navigate(AppRoutes.LiveRatesScreen) {
+									navController.navigate(AppRoutes.FavoriteScreen) {
 										popUpTo(navController.graph.startDestinationId)
 										launchSingleTop = true
 									}
@@ -283,5 +283,5 @@ enum class NavigationRoute(
 	val route: Any,
 ) {
 	CALCULATOR("Calculadora", "💱", AppRoutes.DollarCalculatorScreen),
-	LIVE_RATES("Tasas en Vivo", "📊", AppRoutes.LiveRatesScreen)
+	LIVE_RATES("Favoritos", "📊", AppRoutes.FavoriteScreen)
 }

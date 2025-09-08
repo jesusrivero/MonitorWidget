@@ -60,7 +60,18 @@ dependencies {
 	// --- Kotlin Serialization ---
 	implementation(libs.kotlinx.serialization.json)
 	
+	
+	// Room components
+	implementation(libs.androidx.room.runtime)
+//	kapt("androidx.room:room-compiler:2.7.2")
+	kapt(libs.room.compiler)
+	
+// Kotlin Extensions and Coroutines support for Room
+	implementation(libs.androidx.room.ktx)
 
+// (Opcional) Para probar con coroutines y flow
+	testImplementation(libs.androidx.room.testing)
+	
 	
 	// --- Navigation Compose ---
 	implementation(libs.androidx.navigation.compose)

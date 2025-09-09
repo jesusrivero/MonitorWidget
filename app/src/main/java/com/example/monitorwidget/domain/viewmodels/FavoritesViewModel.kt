@@ -11,27 +11,77 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.example.monitorwidget.domain.usecase.AddFavoriteUseCase
 import com.example.monitorwidget.domain.usecase.DeleteFavoriteUseCase
+import com.example.monitorwidget.domain.usecase.FavoritesUiState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.update
 
 
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
 	private val getFavoritesUseCase: GetFavoritesUseCase,
 	private val addFavoriteUseCase: AddFavoriteUseCase,
-	private val deleteFavoriteUseCase: DeleteFavoriteUseCase
+	private val deleteFavoriteUseCase: DeleteFavoriteUseCase,
+	private val updateFavoriteUseCase: AddFavoriteUseCase
 ) : ViewModel() {
 	
-	val favorites = getFavoritesUseCase()
-		.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+	private val _uiState = MutableStateFlow(FavoritesUiState(isLoading = true))
+	val uiState: StateFlow<FavoritesUiState> = _uiState.asStateFlow()
+	
+	init {
+		viewModelScope.launch {
+			getFavoritesUseCase()
+				.onStart { _uiState.update { it.copy(isLoading = true) } }
+				.catch { e -> _uiState.update { it.copy(isLoading = false, error = e.message) } }
+				.collect { favorites ->
+					_uiState.update {
+						it.copy(favorites = favorites, isLoading = false, error = null)
+					}
+				}
+		}
+	}
 	
 	fun addFavorite(name: String, amountUsd: Double) {
 		viewModelScope.launch {
-			addFavoriteUseCase(FavoriteAmountEntity(name = name, amountUsd = amountUsd))
+			try {
+				addFavoriteUseCase(FavoriteAmountEntity(name = name, amountUsd = amountUsd))
+				_uiState.update { it.copy(message = "✅ Favorito agregado con éxito") }
+			} catch (e: Exception) {
+				_uiState.update { it.copy(error = e.message) }
+			}
 		}
 	}
 	
 	fun deleteFavorite(favorite: FavoriteAmountEntity) {
 		viewModelScope.launch {
-			deleteFavoriteUseCase(favorite)
+			try {
+				deleteFavoriteUseCase(favorite)
+				_uiState.update { it.copy(message = "🗑️ Favorito eliminado") }
+			} catch (e: Exception) {
+				_uiState.update { it.copy(error = e.message) }
+			}
 		}
 	}
+	
+	fun updateFavorite(favorite: FavoriteAmountEntity) {
+		viewModelScope.launch {
+			try {
+				updateFavoriteUseCase(favorite)
+				_uiState.update { it.copy(message = "✏️ Favorito actualizado") }
+			} catch (e: Exception) {
+				_uiState.update { it.copy(error = e.message) }
+			}
+		}
+	}
+	
+	
+	// Para limpiar mensajes después de mostrarlos
+	fun clearMessage() {
+		_uiState.update { it.copy(message = null, error = null) }
+	}
 }
+
+

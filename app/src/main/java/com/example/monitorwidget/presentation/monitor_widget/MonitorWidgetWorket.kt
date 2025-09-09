@@ -28,14 +28,16 @@ class MonitorWorker(context: Context, params: WorkerParameters) : CoroutineWorke
     override suspend fun doWork(): Result {
         return try {
             Log.d("MonitorWorker", "Iniciando actualización del widget...")
-
-            val repository = DollarRepositoryImpl(
-                RetrofitClient.api,
-                DollarDataStore(applicationContext)
-            )
-
-            val useCase = GetDollarRatesUseCase(repository)
-            val rates = useCase() // llama al invoke
+	        
+	        val repository = DollarRepositoryImpl(
+		        RetrofitClient.dollarApi,
+		        RetrofitClient.hexaApi,
+		        DollarDataStore(applicationContext)
+	        )
+	        
+	        
+	        val useCase = GetDollarRatesUseCase(repository)
+            val rates = useCase()
 
             Log.d("MonitorWorker", "Datos recibidos: bcv=${rates.bcv}, timestamp=${rates.timestamp}")
 

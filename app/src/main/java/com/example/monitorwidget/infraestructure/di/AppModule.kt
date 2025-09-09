@@ -6,6 +6,7 @@ import com.example.monitorwidget.data.local.AppDatabase
 import com.example.monitorwidget.data.local.FavoriteAmountDao
 import com.example.monitorwidget.data.preferences.ThemeDataStore
 import com.example.monitorwidget.data.remote.DollarApiService
+import com.example.monitorwidget.data.remote.HexaRateApiService
 import com.example.monitorwidget.data.remote.local.datastore.DollarDataStore
 import com.example.monitorwidget.domain.repository.DollarRepository
 import com.example.monitorwidget.data.repository.DollarRepositoryImpl
@@ -26,7 +27,11 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 	
-
+	
+	private val moshi = Moshi.Builder()
+		.add(KotlinJsonAdapterFactory())
+		.build()
+	
 	@Provides
 	@Singleton
 	fun provideMoshi(): Moshi =
@@ -39,7 +44,7 @@ object AppModule {
 	@Singleton
 	fun provideRetrofit(moshi: Moshi): Retrofit =
 		Retrofit.Builder()
-			.baseUrl("https://ve.dolarapi.com/") // 👈 tu endpoint real
+			.baseUrl("https://ve.dolarapi.com/")
 			.addConverterFactory(MoshiConverterFactory.create(moshi))
 			.build()
 	
@@ -61,8 +66,10 @@ object AppModule {
 	@Singleton
 	fun provideDollarRepository(
 		api: DollarApiService,
-		dataStore: DollarDataStore
-	): DollarRepository = DollarRepositoryImpl(api, dataStore)
+		hexaApi:HexaRateApiService,
+		dataStore: DollarDataStore,
+		
+	): DollarRepository = DollarRepositoryImpl(api, hexaApi, dataStore)
 	
 	@Provides
 	@Singleton
@@ -70,6 +77,16 @@ object AppModule {
 		return ThemeDataStore(context)
 	}
 	
+	
+	@Provides
+	@Singleton
+	fun provideHexaRateApiService(): HexaRateApiService {
+		return Retrofit.Builder()
+			.baseUrl("https://hexarate.paikama.co/api/rates/")
+			.addConverterFactory(MoshiConverterFactory.create(moshi))
+			.build()
+			.create(HexaRateApiService::class.java)
+	}
 	
 	@Provides
 	@Singleton

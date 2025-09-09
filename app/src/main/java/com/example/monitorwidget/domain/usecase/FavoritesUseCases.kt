@@ -5,6 +5,7 @@ import com.example.monitorwidget.domain.repository.FavoriteAmountRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+
 class GetFavoritesUseCase @Inject constructor(
 	private val repository: FavoriteAmountRepository
 ) {
@@ -26,3 +27,21 @@ class DeleteFavoriteUseCase @Inject constructor(
 		repository.deleteFavorite(favorite)
 	}
 }
+
+class UpdateFavoriteUseCase @Inject constructor(
+	private val repository: FavoriteAmountRepository
+) {
+	suspend operator fun invoke(favorite: FavoriteAmountEntity) {
+		repository.updateFavorite(favorite)
+	}
+}
+
+
+
+data class FavoritesUiState(
+	val favorites: List<FavoriteAmountEntity> = emptyList(),
+	val isLoading: Boolean = false,
+	val error: String? = null,
+	val successMessage: String? = null,
+	val message: String? = null
+)

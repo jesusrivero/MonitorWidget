@@ -2,12 +2,6 @@ package com.example.monitorwidget.presentation.ui
 
 
 import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.net.Uri
-import android.view.View
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -52,7 +46,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -82,18 +75,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.monitorwidget.R
+import com.example.monitorwidget.domain.enums.CalculationMode
+import com.example.monitorwidget.domain.enums.NavigationRoute
 import com.example.monitorwidget.presentation.ui.commons.DrawerScaffold
-import com.example.monitorwidget.presentation.navegacion.AppRoutes
-import com.example.monitorwidget.presentation.ui.commons.CalculationMode
-import com.example.monitorwidget.presentation.ui.commons.NavigationRoute
+import com.example.monitorwidget.presentation.utils.captureView
+import com.example.monitorwidget.presentation.utils.shareBitmap
 import com.example.monitorwidget.ui.theme.domain.model.viewmodel.DollarViewModel
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
 import java.text.DecimalFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -125,7 +116,7 @@ fun DollarCalculatorScreen(
 	val context = LocalContext.current
 	val activity = context as Activity
 	
-	
+
 	DrawerScaffold(
 		currentRoute = NavigationRoute.CALCULATOR,
 		navController = navController,
@@ -149,9 +140,7 @@ fun DollarCalculatorScreen(
 					}
 				},
 				actions = {
-					IconButton(
-						onClick = { viewModel.fetchRates() }
-					) {
+					IconButton(onClick = { viewModel.fetchRates() }) {
 						Icon(
 							imageVector = Icons.Default.Refresh,
 							contentDescription = "Refrescar",
@@ -164,139 +153,130 @@ fun DollarCalculatorScreen(
 				)
 			)
 		},
-	) { padding ->
-		Scaffold(
-			modifier = Modifier.padding(padding),
-			floatingActionButton = {
-				FloatingActionButton(
-					onClick = {
-						val rootView = activity.window.decorView.rootView
-						val bitmap = captureView(rootView)
-						shareBitmap(context, bitmap)
-					},
-					containerColor = MaterialTheme.colorScheme.primary
-				) {
-					Icon(
-						imageVector = Icons.Default.Share,
-						contentDescription = "Compartir captura",
-						tint = MaterialTheme.colorScheme.onPrimary
-					)
-				}
-			}
-		) { innerPadding ->
-			Box(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(innerPadding)
+		floatingActionButton = {
+			FloatingActionButton(
+				onClick = {
+					val rootView = activity.window.decorView.rootView
+					val bitmap = captureView(rootView)
+					shareBitmap(context, bitmap)
+				},
+				containerColor = MaterialTheme.colorScheme.primary
 			) {
-				when {
-					loading -> {
-						Box(
-							modifier = Modifier.fillMaxSize(),
-							contentAlignment = Alignment.Center
+				Icon(
+					imageVector = Icons.Default.Share,
+					contentDescription = "Compartir captura",
+					tint = MaterialTheme.colorScheme.onPrimary
+				)
+			}
+		},
+		snackbarHost = { SnackbarHost(snackbarHostState) }
+	) { padding ->
+		Box(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(padding)
+		) {
+			when {
+				loading -> {
+					Box(
+						modifier = Modifier.fillMaxSize(),
+						contentAlignment = Alignment.Center
+					) {
+						CircularProgressIndicator()
+					}
+				}
+				
+				error != null -> {
+					ErrorState(message = error ?: "Error desconocido") {
+						viewModel.fetchRates()
+					}
+				}
+				
+				rates == null -> {
+					ErrorState(message = "No hay tasas disponibles") {
+						viewModel.fetchRates()
+					}
+				}
+				
+				else -> {
+					Box(modifier = Modifier.fillMaxSize()) {
+						Image(
+							painter = painterResource(id = R.drawable.ic_logo_splash),
+							contentDescription = null,
+							modifier = Modifier
+								.fillMaxSize()
+								.align(Alignment.TopCenter),
+							contentScale = ContentScale.Fit
+						)
+						
+						Column(
+							modifier = Modifier
+								.fillMaxSize()
+								.verticalScroll(rememberScrollState())
+								.padding(horizontal = 8.dp, vertical = 12.dp),
+							horizontalAlignment = Alignment.CenterHorizontally
 						) {
-							CircularProgressIndicator()
-						}
-					}
-					
-					error != null -> {
-						ErrorState(message = error ?: "Error desconocido") {
-							viewModel.fetchRates()
-						}
-					}
-					
-					rates == null -> {
-						ErrorState(message = "No hay tasas disponibles") {
-							viewModel.fetchRates()
-						}
-					}
-					
-					else -> {
-						Box(
-							modifier = Modifier.fillMaxSize()
-						) {
-							Image(
-								painter = painterResource(id = R.drawable.ic_logo_splash),
-								contentDescription = null,
+							Card(
 								modifier = Modifier
-									.fillMaxSize()
-									.align(Alignment.TopCenter),
-								contentScale = ContentScale.Fit
-							)
-							
-							Column(
-								modifier = Modifier
-									.fillMaxSize()
-									.verticalScroll(rememberScrollState())
+									.fillMaxWidth()
 									.padding(horizontal = 8.dp, vertical = 12.dp),
-								horizontalAlignment = Alignment.CenterHorizontally
+								shape = RoundedCornerShape(20.dp),
+								elevation = CardDefaults.cardElevation(12.dp),
+								colors = CardDefaults.cardColors(
+									containerColor = MaterialTheme.colorScheme.surface
+								)
 							) {
-								Card(
-									modifier = Modifier
-										.fillMaxWidth()
-										.padding(horizontal = 8.dp, vertical = 12.dp),
-									shape = RoundedCornerShape(20.dp),
-									elevation = CardDefaults.cardElevation(12.dp),
-									colors = CardDefaults.cardColors(
-										containerColor = MaterialTheme.colorScheme.surface
-									)
+								Column(
+									modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp),
+									horizontalAlignment = Alignment.CenterHorizontally
 								) {
-									Column(
-										modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp),
-										horizontalAlignment = Alignment.CenterHorizontally
+									CalculatorHeader(
+										currentMode = calculationMode,
+										onModeChange = {
+											calculationMode = it
+											dollarInput = ""
+										}
+									)
+									
+									Spacer(modifier = Modifier.height(24.dp))
+									
+									EnhancedInputField(
+										value = dollarInput,
+										onValueChange = { dollarInput = it },
+										mode = calculationMode,
+										bcvRate = rates?.bcv,
+										modifier = Modifier.fillMaxWidth()
+									)
+									
+									Spacer(modifier = Modifier.height(32.dp))
+									
+									AnimatedVisibility(
+										visible = isValidInput,
+										enter = fadeIn() + slideInVertically(),
+										exit = fadeOut() + slideOutVertically()
 									) {
-										CalculatorHeader(
-											currentMode = calculationMode,
-											onModeChange = {
-												calculationMode = it
-												dollarInput = ""
+										ResultsSection(
+											bcvResult = bcvResult,
+											formatter = formatter,
+											targetCurrency = if (calculationMode == CalculationMode.USD_TO_BS) "Bs" else "USD",
+											onCopy = { text ->
+												clipboardManager.setText(AnnotatedString(text))
+												coroutineScope.launch {
+													snackbarHostState.showSnackbar("✅ Copiado: $text")
+												}
 											}
 										)
-										
-										Spacer(modifier = Modifier.height(24.dp))
-										
-										EnhancedInputField(
-											value = dollarInput,
-											onValueChange = { dollarInput = it },
-											mode = calculationMode,
-											bcvRate = rates?.bcv,
-											modifier = Modifier.fillMaxWidth()
-										)
-										
-										Spacer(modifier = Modifier.height(32.dp))
-										
-										AnimatedVisibility(
-											visible = isValidInput,
-											enter = fadeIn() + slideInVertically(),
-											exit = fadeOut() + slideOutVertically()
-										) {
-											ResultsSection(
-												bcvResult = bcvResult,
-												formatter = formatter,
-												targetCurrency = if (calculationMode == CalculationMode.USD_TO_BS) "Bs" else "USD",
-												onCopy = { text ->
-													clipboardManager.setText(AnnotatedString(text))
-													coroutineScope.launch {
-														snackbarHostState.showSnackbar("✅ Copiado: $text")
-													}
-												}
-											)
-										}
 									}
 								}
 							}
 						}
 					}
 				}
-				
-				SnackbarHost(
-					hostState = snackbarHostState,
-					modifier = Modifier.align(Alignment.BottomCenter)
-				)
 			}
 		}
 	}
 }
+
 
 
 
@@ -598,34 +578,10 @@ fun BcvResultCard(
 
 
 
-fun captureView(view: View): Bitmap {
-	val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-	val canvas = Canvas(bitmap)
-	view.draw(canvas)
-	return bitmap
-}
-
-fun saveBitmapToCache(context: Context, bitmap: Bitmap): Uri {
-	val cachePath = File(context.cacheDir, "images")
-	cachePath.mkdirs()
-	val file = File(cachePath, "screenshot.png")
-	FileOutputStream(file).use { out ->
-		bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-	}
-	return FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-}
 
 
 
-fun shareBitmap(context: Context, bitmap: Bitmap) {
-	val uri = saveBitmapToCache(context, bitmap)
-	val intent = Intent(Intent.ACTION_SEND).apply {
-		type = "image/png"
-		putExtra(Intent.EXTRA_STREAM, uri)
-		addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-	}
-	context.startActivity(Intent.createChooser(intent, "Compartir captura"))
-}
+
 
 
 

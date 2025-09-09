@@ -7,4 +7,5 @@ interface FavoriteAmountRepository {
 	fun getAllFavorites(): Flow<List<FavoriteAmountEntity>>
 	suspend fun insertFavorite(favorite: FavoriteAmountEntity)
 	suspend fun deleteFavorite(favorite: FavoriteAmountEntity)
+	suspend fun updateFavorite(favorite: FavoriteAmountEntity)
 }

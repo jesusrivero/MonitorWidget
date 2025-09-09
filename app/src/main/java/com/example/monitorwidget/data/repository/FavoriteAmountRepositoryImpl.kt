@@ -19,4 +19,8 @@ class FavoriteAmountRepositoryImpl @Inject constructor(
 		dao.deleteFavorite(favorite)
 	}
 	
+	override suspend fun updateFavorite(favorite: FavoriteAmountEntity) {
+		dao.updateFavorite(favorite)
+	}
+	
 }

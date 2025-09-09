@@ -4,9 +4,9 @@ package com.example.monitorwidget.ui.theme.domain.model.viewmodel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.monitorwidget.domain.enums.FavoriteAmount
 import com.example.monitorwidget.domain.model.DollarRates
 import com.example.monitorwidget.domain.usecase.GetDollarRatesUseCase
-import com.example.monitorwidget.presentation.ui.FavoriteAmount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

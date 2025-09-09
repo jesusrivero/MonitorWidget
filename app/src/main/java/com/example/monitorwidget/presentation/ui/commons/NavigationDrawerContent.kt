@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.monitorwidget.domain.enums.NavigationRoute
 import com.example.monitorwidget.domain.viewmodels.ThemeViewModel
 import com.example.monitorwidget.presentation.navegacion.AppRoutes
 import kotlinx.coroutines.CoroutineScope
@@ -66,7 +67,6 @@ fun NavigationDrawerContent(
 			.fillMaxSize()
 			.padding(16.dp)
 	) {
-		// Header del drawer
 		Box(
 			modifier = Modifier
 				.fillMaxWidth()
@@ -187,6 +187,8 @@ fun DrawerScaffold(
 	currentRoute: NavigationRoute,
 	navController: NavController,
 	topBar: (@Composable (drawerState: DrawerState, scope: CoroutineScope) -> Unit)? = null,
+	floatingActionButton: @Composable (() -> Unit)? = null,
+	snackbarHost: @Composable (() -> Unit)? = null,
 	content: @Composable (PaddingValues) -> Unit,
 ) {
 	val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -201,11 +203,7 @@ fun DrawerScaffold(
 				NavigationDrawerContent(
 					selectedRoute = currentRoute,
 					onRouteSelected = { route ->
-						// Cerrar drawer
-						scope.launch {
-							drawerState.close()
-						}
-						
+						scope.launch { drawerState.close() }
 						
 						if (route != currentRoute) {
 							when (route) {
@@ -231,7 +229,6 @@ fun DrawerScaffold(
 	) {
 		Scaffold(
 			topBar = {
-				
 				if (topBar == null) {
 					CenterAlignedTopAppBar(
 						title = {
@@ -243,13 +240,7 @@ fun DrawerScaffold(
 							)
 						},
 						navigationIcon = {
-							IconButton(
-								onClick = {
-									scope.launch {
-										drawerState.open()
-									}
-								}
-							) {
+							IconButton(onClick = { scope.launch { drawerState.open() } }) {
 								Icon(
 									imageVector = Icons.Default.Menu,
 									contentDescription = "Abrir menú",
@@ -265,23 +256,9 @@ fun DrawerScaffold(
 					topBar(drawerState, scope)
 				}
 			},
+			floatingActionButton = { floatingActionButton?.invoke() },
+			snackbarHost = { snackbarHost?.invoke() },
 			content = content
 		)
 	}
-}
-
-
-enum class CalculationMode {
-	USD_TO_BS,  // Dólares a Bolívares
-	BS_TO_USD   // Bolívares a Dólares
-}
-
-
-enum class NavigationRoute(
-	val title: String,
-	val icon: String,
-	val route: Any,
-) {
-	CALCULATOR("Calculadora", "💱", AppRoutes.DollarCalculatorScreen),
-	LIVE_RATES("Favoritos", "📊", AppRoutes.FavoriteScreen)
 }

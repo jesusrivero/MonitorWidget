@@ -1,7 +1,15 @@
 package com.example.monitorwidget.presentation.ui
 
 
+import android.R.attr.bitmap
 import android.app.Activity
+import android.content.ContentValues
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Rect
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -20,6 +28,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -27,11 +36,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.CurrencyExchange
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -44,6 +56,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SnackbarHost
@@ -62,7 +75,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -75,6 +91,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.monitorwidget.R
@@ -87,6 +105,7 @@ import com.example.monitorwidget.ui.theme.domain.model.viewmodel.DollarViewModel
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 
+// 3. Modifica tu DollarCalculatorScreen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DollarCalculatorScreen(
@@ -115,8 +134,39 @@ fun DollarCalculatorScreen(
 	
 	val context = LocalContext.current
 	val activity = context as Activity
+	val calculatorBounds = remember { mutableStateOf<Rect?>(null) }
 	
-
+	// ✅ Estados para la previsualización
+	var showPreview by remember { mutableStateOf(false) }
+	var previewBitmap by remember { mutableStateOf<Bitmap?>(null) }
+	
+	// ✅ Diálogo de previsualización
+	if (showPreview) {
+		SharePreviewDialog(
+			bitmap = previewBitmap,
+			onDismiss = {
+				showPreview = false
+				previewBitmap = null
+			},
+			onShare = {
+				previewBitmap?.let { bitmap ->
+					shareBitmap(context, bitmap)
+				}
+			},
+			onSave = {
+				previewBitmap?.let { bitmap ->
+					val saved = saveBitmapToGallery(context, bitmap)
+					coroutineScope.launch {
+						snackbarHostState.showSnackbar(
+							if (saved) "✅ Imagen guardada en la galería"
+							else "❌ Error al guardar la imagen"
+						)
+					}
+				}
+			}
+		)
+	}
+	
 	DrawerScaffold(
 		currentRoute = NavigationRoute.CALCULATOR,
 		navController = navController,
@@ -156,14 +206,28 @@ fun DollarCalculatorScreen(
 		floatingActionButton = {
 			FloatingActionButton(
 				onClick = {
-					val rootView = activity.window.decorView.rootView
-					val bitmap = captureView(rootView)
-					shareBitmap(context, bitmap)
+					calculatorBounds.value?.let { rect ->
+						val rootView = activity.window.decorView.rootView
+						val fullBitmap = captureView(rootView)
+						
+						// Recorta el área de la calculadora
+						val cropped = Bitmap.createBitmap(
+							fullBitmap,
+							rect.left.toInt(),
+							rect.top.toInt(),
+							rect.width().toInt(),
+							rect.height().toInt()
+						)
+						
+						// ✅ En lugar de compartir directamente, mostrar preview
+						previewBitmap = cropped
+						showPreview = true
+					}
 				},
 				containerColor = MaterialTheme.colorScheme.primary
 			) {
 				Icon(
-					imageVector = Icons.Default.Share,
+					imageVector = Icons.Default.CameraAlt,
 					contentDescription = "Compartir captura",
 					tint = MaterialTheme.colorScheme.onPrimary
 				)
@@ -171,6 +235,7 @@ fun DollarCalculatorScreen(
 		},
 		snackbarHost = { SnackbarHost(snackbarHostState) }
 	) { padding ->
+		// ... resto del código igual
 		Box(
 			modifier = Modifier
 				.fillMaxSize()
@@ -219,7 +284,16 @@ fun DollarCalculatorScreen(
 							Card(
 								modifier = Modifier
 									.fillMaxWidth()
-									.padding(horizontal = 8.dp, vertical = 12.dp),
+									.padding(horizontal = 8.dp, vertical = 12.dp)
+									.onGloballyPositioned { coords ->
+										val rectF = coords.boundsInWindow()
+										calculatorBounds.value = Rect(
+											rectF.left.toInt(),
+											rectF.top.toInt(),
+											rectF.right.toInt(),
+											rectF.bottom.toInt()
+										)
+									},
 								shape = RoundedCornerShape(20.dp),
 								elevation = CardDefaults.cardElevation(12.dp),
 								colors = CardDefaults.cardColors(
@@ -276,6 +350,7 @@ fun DollarCalculatorScreen(
 		}
 	}
 }
+
 
 
 
@@ -513,7 +588,9 @@ fun BcvResultCard(
 	onCopy: (String) -> Unit
 ) {
 	Card(
-		modifier = Modifier.fillMaxWidth(),
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(horizontal = 8.dp, vertical = 12.dp),
 		shape = RoundedCornerShape(16.dp),
 		colors = CardDefaults.cardColors(
 			containerColor = MaterialTheme.colorScheme.surface
@@ -524,13 +601,12 @@ fun BcvResultCard(
 		Column(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(12.dp), // un poco más compacto
+				.padding(12.dp),
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
-
 			Text(
 				text = "BCV",
-				style = MaterialTheme.typography.labelMedium, // más pequeño
+				style = MaterialTheme.typography.labelMedium,
 				fontWeight = FontWeight.Medium,
 				color = MaterialTheme.colorScheme.onSurfaceVariant,
 				letterSpacing = 0.5.sp
@@ -538,7 +614,6 @@ fun BcvResultCard(
 			
 			Spacer(modifier = Modifier.height(2.dp))
 			
-
 			Text(
 				text = "$value $currency",
 				style = MaterialTheme.typography.headlineSmall,
@@ -550,7 +625,6 @@ fun BcvResultCard(
 			)
 			
 			Spacer(modifier = Modifier.height(12.dp))
-			
 			
 			TextButton(
 				onClick = { onCopy("$value $currency") },
@@ -574,8 +648,152 @@ fun BcvResultCard(
 	}
 }
 
+// 1. Primero, crea el composable del diálogo de previsualización
+@Composable
+fun SharePreviewDialog(
+	bitmap: Bitmap?,
+	onDismiss: () -> Unit,
+	onShare: () -> Unit,
+	onSave: (() -> Unit)? = null
+) {
+	if (bitmap != null) {
+		Dialog(
+			onDismissRequest = onDismiss,
+			properties = DialogProperties(usePlatformDefaultWidth = false)
+		) {
+			Card(
+				modifier = Modifier
+					.fillMaxWidth(0.95f)
+					.wrapContentHeight(),
+				shape = RoundedCornerShape(16.dp),
+				colors = CardDefaults.cardColors(
+					containerColor = MaterialTheme.colorScheme.surface
+				)
+			) {
+				Column(
+					modifier = Modifier.padding(16.dp),
+					horizontalAlignment = Alignment.CenterHorizontally
+				) {
+					// Header del diálogo
+					Text(
+						text = "Vista previa",
+						style = MaterialTheme.typography.titleLarge,
+						fontWeight = FontWeight.Bold,
+						color = MaterialTheme.colorScheme.onSurface
+					)
+					
+					Spacer(modifier = Modifier.height(16.dp))
+					
+					// Imagen preview
+					Card(
+						modifier = Modifier
+							.fillMaxWidth()
+							.wrapContentHeight(),
+						shape = RoundedCornerShape(12.dp),
+						elevation = CardDefaults.cardElevation(4.dp)
+					) {
+						Image(
+							bitmap = bitmap.asImageBitmap(),
+							contentDescription = "Preview de captura",
+							modifier = Modifier
+								.fillMaxWidth()
+								.wrapContentHeight(),
+						)
+					}
+					
+					Spacer(modifier = Modifier.height(20.dp))
+					
+					// Botones de acción
+					Row(
+						modifier = Modifier.fillMaxWidth(),
+						horizontalArrangement = Arrangement.spacedBy(8.dp)
+					) {
+						// Botón Guardar (opcional)
+						if (onSave != null) {
+							Button(
+								onClick = {
+									onSave()
+									onDismiss()
+								},
+								modifier = Modifier.weight(1f),
+								colors = ButtonDefaults.buttonColors(
+									containerColor = MaterialTheme.colorScheme.secondary
+								)
+							) {
+								Icon(
+									imageVector = Icons.Default.Save,
+									contentDescription = null,
+									modifier = Modifier.size(14.dp)
+								)
+								Spacer(modifier = Modifier.width(4.dp))
+								Text("Guardar", fontSize = 16.sp)
+							}
+						}
+						
+						// Botón Compartir
+						Button(
+							onClick = {
+								onShare()
+								onDismiss()
+							},
+							modifier = Modifier.weight(1f),
+							colors = ButtonDefaults.buttonColors(
+								containerColor = MaterialTheme.colorScheme.primary
+							)
+						) {
+							Icon(
+								imageVector = Icons.Default.Share,
+								contentDescription = null,
+								modifier = Modifier.size(14.dp)
+							)
+							Spacer(modifier = Modifier.width(4.dp))
+							Text("Compartir", fontSize = 16.sp)
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
-
+// 2. Función para guardar en galería (opcional)
+fun saveBitmapToGallery(context: Context, bitmap: Bitmap): Boolean {
+	return try {
+		val contentValues = ContentValues().apply {
+			put(MediaStore.MediaColumns.DISPLAY_NAME, "Calculator_${System.currentTimeMillis()}.png")
+			put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+				put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/DollarCalculator")
+				put(MediaStore.MediaColumns.IS_PENDING, 1)
+			}
+		}
+		
+		val uri = context.contentResolver.insert(
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+				MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+			} else {
+				MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+			},
+			contentValues
+		)
+		
+		uri?.let {
+			context.contentResolver.openOutputStream(it)?.use { outputStream ->
+				bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+			}
+			
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+				contentValues.clear()
+				contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
+				context.contentResolver.update(uri, contentValues, null, null)
+			}
+		}
+		true
+	} catch (e: Exception) {
+		e.printStackTrace()
+		false
+	}
+}
 
 
 

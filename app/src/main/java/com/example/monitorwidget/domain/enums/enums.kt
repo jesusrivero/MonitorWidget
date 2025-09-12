@@ -15,7 +15,7 @@ enum class NavigationRoute(
 	val route: Any,
 ) {
 	CALCULATOR("Calculadora", "💱", AppRoutes.DollarCalculatorScreen),
-	LIVE_RATES("Favoritos", "📊", AppRoutes.FavoriteScreen)
+	LIVE_RATES("Gastos recurrentes", "💡", AppRoutes.FavoriteScreen)
 }
 
 

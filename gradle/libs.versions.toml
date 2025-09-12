@@ -1,17 +1,21 @@
 [versions]
 activityComposeVersion = "1.9.1"
 agp = "8.10.1"
+androidxCoreKtx = "1.17.0"
+androidxWorkRuntimeKtx = "2.9.0"
 charty = "1.0.0"
 converterMoshi = "2.9.0"
 coreKtxVersion = "1.13.1"
 coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.7"
+firebaseBom = "34.2.0"
 glanceAppwidget = "1.1.1"
 hiltAndroid = "2.52"
 hiltCompiler = "2.52"
 hiltNavigationCompose = "1.2.0"
 #hiltNavigationComposeVersion = "1.1.0"
 hiltNavigationComposeVersion = "1.2.0"
+hiltWork = "1.2.0"
 javapoet = "0.5.0"
 javaxInject = "1"
 kotlin = "2.0.21"
@@ -40,6 +44,15 @@ workRuntimeKtxVersion = "2.9.0"
 navigationComposeAndroid = "2.9.3"
 
 [libraries]
+
+androidx-core-ktx-v1170 = { module = "androidx.core:core-ktx", version.ref = "androidxCoreKtx" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltWork" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
+androidx-work-runtime-ktx-v290 = { module = "androidx.work:work-runtime-ktx", version.ref = "androidxWorkRuntimeKtx" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.1.2" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging-ktx" }
+google-firebase-common-ktx = { module = "com.google.firebase:firebase-common-ktx" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 
 androidx-activity-compose-v191 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }

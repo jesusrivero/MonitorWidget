@@ -16,38 +16,38 @@ class DollarRepositoryImpl(
 	private val dataStore: DollarDataStore
 ) : DollarRepository {
 	
-	@RequiresApi(Build.VERSION_CODES.O)
 	override suspend fun getDollarRates(): DollarRates {
 		return try {
 			// ✅ Intento principal con DolarAPI
 			val ratesList = api.getDolarRates()
 			val bcv = ratesList.find { it.fuente.lowercase() == "oficial" }?.promedio
+				?: throw Exception("BCV no encontrado en DolarAPI")
 			
-			if (bcv == null) throw Exception("BCV no encontrado en DolarAPI")
-			
+			val nowSec = System.currentTimeMillis() / 1000L
 			val rates = DollarRates(
 				bcv = bcv,
-				timestamp = Instant.now().epochSecond
+				timestamp = nowSec
 			)
 			
 			dataStore.saveRates(rates)
 			rates
 			
 		} catch (e: Exception) {
-			// ✅ Si falla, intento con HexaRate
+			// ✅ Fallback: HexaRate
 			try {
 				val fallback = hexaApi.getUsdToVes()
 				if (fallback.status_code != 200) throw Exception("HexaRate inválido")
 				
+				val nowSec = System.currentTimeMillis() / 1000L
 				val rates = DollarRates(
 					bcv = fallback.data.mid,
-					timestamp = Instant.now().epochSecond
+					timestamp = nowSec
 				)
 				
 				dataStore.saveRates(rates)
 				rates
 			} catch (fallbackEx: Exception) {
-				// ✅ Si ambas fallan, devuelvo caché o propago excepción
+				// ✅ Si ambas fallan, devuelve caché o propaga excepción
 				dataStore.getRates() ?: throw fallbackEx
 			}
 		}

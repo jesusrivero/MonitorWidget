@@ -22,91 +22,56 @@ import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
-
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 	
-	
-	private val moshi = Moshi.Builder()
-		.add(KotlinJsonAdapterFactory())
-		.build()
-	
-	@Provides
-	@Singleton
+	@Provides @Singleton
 	fun provideMoshi(): Moshi =
-		Moshi.Builder()
-			.add(KotlinJsonAdapterFactory())
-			.build()
+		Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
 	
-
-	@Provides
-	@Singleton
-	fun provideRetrofit(moshi: Moshi): Retrofit =
+	@Provides @Singleton
+	fun provideDollarRetrofit(moshi: Moshi): Retrofit =
 		Retrofit.Builder()
 			.baseUrl("https://ve.dolarapi.com/")
 			.addConverterFactory(MoshiConverterFactory.create(moshi))
 			.build()
 	
-
-	@Provides
-	@Singleton
+	@Provides @Singleton
 	fun provideDollarApiService(retrofit: Retrofit): DollarApiService =
 		retrofit.create(DollarApiService::class.java)
 	
-
-	@Provides
-	@Singleton
-	fun provideDollarDataStore(
-		@ApplicationContext context: Context
-	): DollarDataStore = DollarDataStore(context)
-	
-
-	@Provides
-	@Singleton
-	fun provideDollarRepository(
-		api: DollarApiService,
-		hexaApi:HexaRateApiService,
-		dataStore: DollarDataStore,
-		
-	): DollarRepository = DollarRepositoryImpl(api, hexaApi, dataStore)
-	
-	@Provides
-	@Singleton
-	fun provideThemeDataStore(@ApplicationContext context: Context): ThemeDataStore {
-		return ThemeDataStore(context)
-	}
-	
-	
-	@Provides
-	@Singleton
-	fun provideHexaRateApiService(): HexaRateApiService {
-		return Retrofit.Builder()
+	@Provides @Singleton
+	fun provideHexaRateApiService(moshi: Moshi): HexaRateApiService =
+		Retrofit.Builder()
 			.baseUrl("https://hexarate.paikama.co/api/rates/")
 			.addConverterFactory(MoshiConverterFactory.create(moshi))
 			.build()
 			.create(HexaRateApiService::class.java)
-	}
+	
+	@Provides @Singleton
+	fun provideDollarDataStore(@ApplicationContext context: Context): DollarDataStore =
+		DollarDataStore(context)
+	
+	@Provides @Singleton
+	fun provideDollarRepository(
+		api: DollarApiService,
+		hexaApi: HexaRateApiService,
+		dataStore: DollarDataStore,
+	): DollarRepository = DollarRepositoryImpl(api, hexaApi, dataStore)
+	
+	@Provides @Singleton
+	fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
+		Room.databaseBuilder(context, AppDatabase::class.java, "app_database").build()
 	
 	@Provides
-	@Singleton
-	fun provideDatabase(
-		@ApplicationContext context: Context
-	): AppDatabase =
-		Room.databaseBuilder(
-			context,
-			AppDatabase::class.java,
-			"app_database"
-		).build()
+	fun provideFavoriteAmountDao(db: AppDatabase): FavoriteAmountDao = db.favoriteAmountDao()
 	
-	@Provides
-	fun provideFavoriteAmountDao(db: AppDatabase): FavoriteAmountDao =
-		db.favoriteAmountDao()
+	@Provides @Singleton
+	fun provideFavoriteAmountRepository(dao: FavoriteAmountDao): FavoriteAmountRepository =
+		FavoriteAmountRepositoryImpl(dao)
 	
-	@Provides
-	@Singleton
-	fun provideFavoriteAmountRepository(
-		dao: FavoriteAmountDao
-	): FavoriteAmountRepository = FavoriteAmountRepositoryImpl(dao)
-	
+	@Provides @Singleton
+	fun provideThemeDataStore(@ApplicationContext context: Context): ThemeDataStore =
+		ThemeDataStore(context)
 }

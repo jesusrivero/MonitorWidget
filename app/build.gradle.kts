@@ -4,6 +4,7 @@ plugins {
 	alias(libs.plugins.kotlin.compose)
 	id("com.google.dagger.hilt.android")   // ✅ plugin de Hilt directo
 	id("kotlin-kapt")
+	id("com.google.gms.google-services")
 	alias(libs.plugins.jetbrainsKotlinSerialization)
 }
 
@@ -45,33 +46,34 @@ android {
 }
 
 dependencies {
-
-// --- Hilt ---
-	implementation(libs.hilt.android)
-	kapt(libs.hilt.compiler)
+	
+	// --- WorkManager (UNA sola referencia) ---
+	implementation("androidx.work:work-runtime-ktx:2.9.0")
+	
+	// --- Hilt (Dagger) ---
+	implementation(libs.hilt.android)          // 2.52 (tu version catalog)
+	kapt(libs.hilt.compiler)                    // 2.52
+	
+	// --- Hilt + WorkManager (versiones compatibles) ---
+	implementation("androidx.hilt:hilt-work:1.2.0")
+	kapt("androidx.hilt:hilt-compiler:1.2.0")
+	
+	// --- Hilt Navigation Compose ---
 	implementation(libs.androidx.hilt.navigation.compose)
 	
-
 	// --- Core AndroidX ---
 	implementation(libs.androidx.core.ktx.v1131)
 	implementation(libs.androidx.lifecycle.runtime.ktx.v284)
 	implementation(libs.androidx.activity.compose.v191)
-
+	
 	// --- Kotlin Serialization ---
 	implementation(libs.kotlinx.serialization.json)
 	
-	
-	// Room components
+	// --- Room ---
 	implementation(libs.androidx.room.runtime)
-//	kapt("androidx.room:room-compiler:2.7.2")
 	kapt(libs.room.compiler)
-	
-// Kotlin Extensions and Coroutines support for Room
 	implementation(libs.androidx.room.ktx)
-
-// (Opcional) Para probar con coroutines y flow
 	testImplementation(libs.androidx.room.testing)
-	
 	
 	// --- Navigation Compose ---
 	implementation(libs.androidx.navigation.compose)
@@ -85,10 +87,12 @@ dependencies {
 	
 	// --- SplashScreen ---
 	implementation(libs.androidx.core.splashscreen)
-
 	
-	// --- WorkManager ---
-	implementation(libs.androidx.work.runtime.ktx)
+	// --- Firebase ---
+	implementation(platform(libs.firebase.bom))
+	implementation(libs.firebase.analytics)
+	implementation(libs.firebase.messaging)
+	implementation(libs.google.firebase.common.ktx)
 	
 	// --- DataStore ---
 	implementation(libs.androidx.datastore.preferences)
@@ -96,12 +100,12 @@ dependencies {
 	// --- Glance AppWidget ---
 	implementation(libs.androidx.glance.appwidget)
 	
-	// --- Core AndroidX ---
+	// --- (Evita duplicados de core/activity/lifecycle) ---
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)
 	implementation(libs.androidx.activity.compose)
 	
-	// --- Compose BOM (alineado con todo Compose) ---
+	// --- Compose BOM ---
 	implementation(platform(libs.androidx.compose.bom))
 	implementation(libs.androidx.ui)
 	implementation(libs.androidx.ui.graphics)
@@ -119,8 +123,3 @@ dependencies {
 	debugImplementation(libs.androidx.ui.test.manifest)
 }
 
-configurations.all {
-	resolutionStrategy {
-		force("com.google.guava:guava:31.1-jre")
-	}
-}

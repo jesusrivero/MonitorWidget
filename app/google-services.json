@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "229921837226",
+    "project_id": "monitorwidget",
+    "storage_bucket": "monitorwidget.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:229921837226:android:9de2ba0e05d057f9e840d3",
+        "android_client_info": {
+          "package_name": "com.example.monitorwidget"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA76h8Cc7Fmr6K_74REgPNFObTlbbsOLiI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

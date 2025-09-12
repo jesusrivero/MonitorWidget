@@ -209,14 +209,18 @@ fun DrawerScaffold(
 							when (route) {
 								NavigationRoute.CALCULATOR -> {
 									navController.navigate(AppRoutes.DollarCalculatorScreen) {
-										popUpTo(navController.graph.startDestinationId)
+										popUpTo(navController.graph.startDestinationId) {
+											inclusive = true
+										}
 										launchSingleTop = true
 									}
 								}
 								
 								NavigationRoute.LIVE_RATES -> {
 									navController.navigate(AppRoutes.FavoriteScreen) {
-										popUpTo(navController.graph.startDestinationId)
+										popUpTo(navController.graph.startDestinationId) {
+											inclusive = true
+										}
 										launchSingleTop = true
 									}
 								}

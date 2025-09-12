@@ -143,7 +143,7 @@ fun FavoriteScreen(
 			CenterAlignedTopAppBar(
 				title = {
 					Text(
-						text = "Favoritos",
+						text = "Gastos recurrentes",
 						style = MaterialTheme.typography.titleLarge,
 						fontWeight = FontWeight.Bold,
 						color = MaterialTheme.colorScheme.onPrimary
@@ -341,7 +341,7 @@ private fun FavoriteSection(
 		verticalAlignment = Alignment.CenterVertically
 	) {
 		Text(
-			text = "💡 Mis Favoritos",
+			text = "💡 Mis Recurrentes",
 			style = MaterialTheme.typography.titleLarge,
 			fontWeight = FontWeight.Bold
 		)
@@ -355,7 +355,7 @@ private fun FavoriteSection(
 		) {
 			Icon(
 				imageVector = Icons.Default.Add,
-				contentDescription = "Agregar favorito",
+				contentDescription = "Agregar gasto recurrente",
 				tint = MaterialTheme.colorScheme.onPrimary
 			)
 		}
@@ -418,7 +418,7 @@ private fun EmptyFavoritesState() {
 			)
 			Spacer(modifier = Modifier.height(12.dp))
 			Text(
-				text = "Aún no tienes favoritos",
+				text = "Aún no tienes gastos recurrentes",
 				style = MaterialTheme.typography.titleMedium,
 				fontWeight = FontWeight.Medium
 			)

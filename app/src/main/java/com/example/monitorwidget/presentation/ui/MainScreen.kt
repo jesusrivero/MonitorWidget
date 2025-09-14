@@ -235,7 +235,7 @@ fun DollarCalculatorScreen(
 		},
 		snackbarHost = { SnackbarHost(snackbarHostState) }
 	) { padding ->
-		// ... resto del código igual
+		
 		Box(
 			modifier = Modifier
 				.fillMaxSize()

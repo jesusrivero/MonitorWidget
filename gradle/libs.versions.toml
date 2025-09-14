@@ -34,6 +34,7 @@ moshiKotlin = "1.15.0"
 moshiKotlinCodegen = "1.15.0"
 moshiKotlinCodegenVersion = "1.15.1"
 moshiVersion = "1.15.0"
+playServicesAds = "24.6.0"
 retrofit = "2.9.0"
 roomKtx = "2.7.2"
 room = "2.7.2"
@@ -53,6 +54,7 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.1.2"
 firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging-ktx" }
 google-firebase-common-ktx = { module = "com.google.firebase:firebase-common-ktx" }
+play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 
 androidx-activity-compose-v191 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }

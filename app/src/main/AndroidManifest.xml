@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Necesario si usarás foreground service para trabajos expedited -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <!-- Recomendado en Android 14+ para trabajos de sync/datos -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
     <application
         android:name=".MyApp"
         android:allowBackup="true"
@@ -51,13 +54,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-        <service
-            android:name="com.example.monitorwidget.data.services.MyFirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
-            </intent-filter>
-        </service>
+
         <!-- Desactiva el inicializador por defecto de WorkManager (AndroidX Startup) -->
         <provider
             android:name="androidx.startup.InitializationProvider"

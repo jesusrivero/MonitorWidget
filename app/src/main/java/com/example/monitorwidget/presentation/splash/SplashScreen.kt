@@ -28,7 +28,7 @@ fun SplashScreen(navController: NavController) {
 		contentAlignment = Alignment.Center
 	) {
 		Image(
-			painter = painterResource(id = R.drawable.ic_logo_splash), // tu logo
+			painter = painterResource(id = R.drawable.ic_logo_splash),
 			contentDescription = "Logo",
 			modifier = Modifier
 				.size(200.dp)
@@ -36,7 +36,7 @@ fun SplashScreen(navController: NavController) {
 	}
 	
 	LaunchedEffect(Unit) {
-		delay(2000) // 2 segundos
+		delay(1000)
 		navController.navigate(AppRoutes.DollarCalculatorScreen) {
 			popUpTo(AppRoutes.SplashScreen) { inclusive = true }
 		}

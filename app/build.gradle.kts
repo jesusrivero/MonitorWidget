@@ -88,11 +88,14 @@ dependencies {
 	// --- SplashScreen ---
 	implementation(libs.androidx.core.splashscreen)
 	
-	// --- Firebase ---
-	implementation(platform(libs.firebase.bom))
-	implementation(libs.firebase.analytics)
-	implementation(libs.firebase.messaging)
-	implementation(libs.google.firebase.common.ktx)
+	// --- AddMob ---
+//	implementation (libs.play.services.ads)
+	
+//	// --- Firebase ---
+//	implementation(platform(libs.firebase.bom))
+//	implementation(libs.firebase.analytics)
+//	implementation(libs.firebase.messaging)
+//	implementation(libs.google.firebase.common.ktx)
 	
 	// --- DataStore ---
 	implementation(libs.androidx.datastore.preferences)

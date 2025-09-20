@@ -1,14 +1,10 @@
 package com.example.monitorwidget.data.repository
 
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
 import com.example.monitorwidget.data.remote.DollarApiService
 import com.example.monitorwidget.data.remote.HexaRateApiService
 import com.example.monitorwidget.data.remote.local.datastore.DollarDataStore
 import com.example.monitorwidget.domain.model.DollarRates
 import com.example.monitorwidget.domain.repository.DollarRepository
-import java.time.Instant
 
 class DollarRepositoryImpl(
 	private val api: DollarApiService,

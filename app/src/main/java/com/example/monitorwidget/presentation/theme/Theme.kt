@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.monitorwidget.data.preferences.ThemeDataStore
 
 // Colores personalizados para app financiera
 private val FinancialGreen = Color(0xFF10B981)      // Verde principal (éxito financiero)
@@ -100,6 +101,10 @@ fun MonitorWidgetTheme(
 	dynamicColor: Boolean = false, // Deshabilitado para mantener consistencia
 	content: @Composable () -> Unit
 ) {
+	val context = LocalContext.current
+	val shared = ThemeDataStore(context)
+	
+	
 	val colorScheme = when {
 		dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
 			val context = LocalContext.current

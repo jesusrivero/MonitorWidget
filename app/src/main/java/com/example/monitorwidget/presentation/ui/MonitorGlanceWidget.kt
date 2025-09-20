@@ -1,42 +1,47 @@
 package com.example.monitorwidget.presentation.ui
 
-import androidx.glance.action.actionStartActivity
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.glance.Button
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.LocalContext
+import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
-import androidx.glance.layout.*
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
+import androidx.glance.layout.Column
+import androidx.glance.layout.Row
+import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.height
+import androidx.glance.layout.padding
+import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.example.monitorwidget.data.remote.local.datastore.DollarDataStore
-import com.example.monitorwidget.domain.model.DollarRates
 import com.example.monitorwidget.domain.RefreshAction
+import com.example.monitorwidget.domain.model.DollarRates
 import com.example.monitorwidget.infraestructure.MainActivity
+import com.example.monitorwidget.presentation.theme.MonitorWidgetTheme
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
-import java.util.*
-
-import androidx.glance.appwidget.action.actionStartActivity
-
-import androidx.glance.text.Text
-
-import androidx.glance.LocalContext
-import com.example.monitorwidget.presentation.navegacion.AppRoutes
+import java.util.Date
+import java.util.Locale
 
 
 class MonitorGlanceWidget : GlanceAppWidget() {
@@ -51,7 +56,6 @@ class MonitorGlanceWidget : GlanceAppWidget() {
 		}
 	}
 }
-
 
 @SuppressLint("RestrictedApi")
 @Composable
@@ -195,5 +199,18 @@ fun MonitorWidgetContent(rates: DollarRates?) {
 				}
 			}
 		}
+	}
+}
+
+@Composable
+@Preview
+fun MonitorWidgetContentPreview(){
+	MonitorWidgetTheme {
+		MonitorWidgetContent(
+			rates = DollarRates(
+				bcv = 10.0,
+				timestamp = 10L
+			)
+		)
 	}
 }

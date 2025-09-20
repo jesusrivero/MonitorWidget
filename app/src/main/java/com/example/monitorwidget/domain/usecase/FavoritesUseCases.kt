@@ -37,11 +37,3 @@ class UpdateFavoriteUseCase @Inject constructor(
 }
 
 
-
-data class FavoritesUiState(
-	val favorites: List<FavoriteAmountEntity> = emptyList(),
-	val isLoading: Boolean = false,
-	val error: String? = null,
-	val successMessage: String? = null,
-	val message: String? = null
-)

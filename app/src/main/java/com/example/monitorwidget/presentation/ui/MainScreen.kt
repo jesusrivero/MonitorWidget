@@ -1,15 +1,18 @@
 package com.example.monitorwidget.presentation.ui
 
 
-import android.R.attr.bitmap
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -38,7 +41,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.CurrencyExchange
 import androidx.compose.material.icons.filled.Menu
@@ -56,7 +58,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SnackbarHost
@@ -65,6 +66,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -93,17 +95,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.monitorwidget.R
-import com.example.monitorwidget.domain.enums.CalculationMode
-import com.example.monitorwidget.domain.enums.NavigationRoute
+import com.example.monitorwidget.domain.model.enums.CalculationMode
+import com.example.monitorwidget.domain.model.enums.NavigationRoute
 import com.example.monitorwidget.presentation.ui.commons.DrawerScaffold
 import com.example.monitorwidget.presentation.utils.captureView
 import com.example.monitorwidget.presentation.utils.shareBitmap
 import com.example.monitorwidget.ui.theme.domain.model.viewmodel.DollarViewModel
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
+import android.Manifest
+
+
+
 
 // 3. Modifica tu DollarCalculatorScreen
 @OptIn(ExperimentalMaterial3Api::class)
@@ -139,6 +146,34 @@ fun DollarCalculatorScreen(
 	// ✅ Estados para la previsualización
 	var showPreview by remember { mutableStateOf(false) }
 	var previewBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+	
+	// ✅ State para saber si ya pedimos el permiso
+	var hasAskedPermission by rememberSaveable { mutableStateOf(false) }
+	
+	// ✅ Registrar launcher para pedir permiso
+	val launcher = rememberLauncherForActivityResult(
+		contract = ActivityResultContracts.RequestPermission()
+	) { isGranted ->
+		if (isGranted) {
+			Log.d("DollarCalculatorScreen", "✅ Permiso de notificaciones concedido")
+		} else {
+			Log.w("DollarCalculatorScreen", "❌ Permiso de notificaciones denegado")
+		}
+	}
+	
+	// ✅ Pedir permiso solo si es Android 13+ y aún no lo hemos solicitado
+	LaunchedEffect(Unit) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !hasAskedPermission) {
+			if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+				!= PackageManager.PERMISSION_GRANTED
+			) {
+				launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+			}
+			hasAskedPermission = true
+		}
+	}
+	
 	
 	// ✅ Diálogo de previsualización
 	if (showPreview) {

@@ -45,12 +45,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.monitorwidget.domain.enums.NavigationRoute
+import com.example.monitorwidget.domain.model.enums.NavigationRoute
 import com.example.monitorwidget.domain.viewmodels.ThemeViewModel
 import com.example.monitorwidget.presentation.navegacion.AppRoutes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-
 
 
 @Composable
@@ -64,8 +63,12 @@ fun NavigationDrawerContent(
 	
 	Column(
 		modifier = Modifier
+			.background(
+				color = MaterialTheme.colorScheme.surface,
+			)
 			.fillMaxSize()
 			.padding(16.dp)
+	
 	) {
 		Box(
 			modifier = Modifier
@@ -150,7 +153,7 @@ fun NavigationDrawerContent(
 		
 		Spacer(modifier = Modifier.weight(1f))
 		
-	
+		
 		Card(
 			modifier = Modifier.fillMaxWidth(),
 			colors = CardDefaults.cardColors(
@@ -160,8 +163,9 @@ fun NavigationDrawerContent(
 		) {
 			
 			Column(
-				modifier = Modifier.fillMaxWidth().
-				padding(16.dp),
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(16.dp),
 				horizontalAlignment = Alignment.CenterHorizontally,
 				verticalArrangement = Arrangement.Center
 			)
@@ -178,7 +182,6 @@ fun NavigationDrawerContent(
 		}
 	}
 }
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)

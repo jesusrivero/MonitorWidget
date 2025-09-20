@@ -1,6 +1,6 @@
 package com.example.monitorwidget.presentation.utils
 
-import com.example.monitorwidget.domain.enums.FavoriteSuggestion
+import com.example.monitorwidget.domain.model.enums.FavoriteSuggestion
 
 fun getSuggestedFavorites(): List<FavoriteSuggestion> {
 	return listOf(

@@ -13,7 +13,7 @@ object RetrofitClient {
 	
 	val dollarApi: DollarApiService = Retrofit.Builder()
 		.baseUrl("https://ve.dolarapi.com/")
-		.addConverterFactory(MoshiConverterFactory.create(moshi))
+		.addConverterFactory(MoshiConverterFactory.create( moshi))
 		.build()
 		.create(DollarApiService::class.java)
 	

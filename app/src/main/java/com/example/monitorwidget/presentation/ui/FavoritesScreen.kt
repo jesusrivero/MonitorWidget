@@ -72,11 +72,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.monitorwidget.domain.enums.FavoriteSuggestion
-import com.example.monitorwidget.domain.enums.NavigationRoute
+import com.example.monitorwidget.domain.model.enums.FavoriteSuggestion
+import com.example.monitorwidget.domain.model.enums.NavigationRoute
 import com.example.monitorwidget.domain.model.DollarRates
 import com.example.monitorwidget.domain.model.entity.FavoriteAmountEntity
-import com.example.monitorwidget.domain.usecase.FavoritesUiState
+import com.example.monitorwidget.domain.model.enums.FavoritesUiState
 import com.example.monitorwidget.domain.viewmodels.FavoritesViewModel
 import java.text.DecimalFormat
 import com.example.monitorwidget.presentation.ui.commons.DrawerScaffold

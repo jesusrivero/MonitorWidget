@@ -3,15 +3,13 @@ package com.example.monitorwidget.domain.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.monitorwidget.domain.model.entity.FavoriteAmountEntity
+import com.example.monitorwidget.domain.model.enums.FavoritesUiState
 import com.example.monitorwidget.domain.usecase.GetFavoritesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.example.monitorwidget.domain.usecase.AddFavoriteUseCase
 import com.example.monitorwidget.domain.usecase.DeleteFavoriteUseCase
-import com.example.monitorwidget.domain.usecase.FavoritesUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -2,6 +2,8 @@ package com.example.monitorwidget.infraestructure.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.monitorwidget.data.local.AppDatabase
 import com.example.monitorwidget.data.local.FavoriteAmountDao
 import com.example.monitorwidget.data.preferences.ThemeDataStore
@@ -22,6 +24,8 @@ import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
+
+
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
@@ -62,7 +66,13 @@ object AppModule {
 	
 	@Provides @Singleton
 	fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
-		Room.databaseBuilder(context, AppDatabase::class.java, "app_database").build()
+		Room.databaseBuilder(context, AppDatabase::class.java, "app_database")
+			.addMigrations(object : Migration(1, 2) {
+				override fun migrate(db: SupportSQLiteDatabase) {
+					db.execSQL("ALTER TABLE favorite_amounts ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD'")
+				}
+			})
+			.build()
 	
 	@Provides
 	fun provideFavoriteAmountDao(db: AppDatabase): FavoriteAmountDao = db.favoriteAmountDao()

@@ -6,6 +6,7 @@ plugins {
 	id("kotlin-kapt")
 	id("com.google.gms.google-services")
 	alias(libs.plugins.jetbrainsKotlinSerialization)
+	id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -21,14 +22,36 @@ android {
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}
 	
+	signingConfigs {
+		create("release") {
+			storeFile = file("widget.jks")
+			storePassword = "key)T$7wL10"
+			keyAlias = "monitorwidget"
+			keyPassword = "key)T$7wL10"
+		}
+	}
+	
 	
 	buildTypes {
-		release {
+		getByName("release") {
+			isMinifyEnabled = true
+			proguardFiles(
+				getDefaultProguardFile("proguard-android-optimize.txt"),
+				"proguard-rules.pro"
+			)
+			signingConfig = signingConfigs.getByName("release")
+			isShrinkResources = true
+			isDebuggable = false
+		}
+		
+		getByName("debug") {
 			isMinifyEnabled = false
 			proguardFiles(
 				getDefaultProguardFile("proguard-android-optimize.txt"),
 				"proguard-rules.pro"
 			)
+			isShrinkResources = false
+			isDebuggable = true
 		}
 	}
 	
@@ -92,6 +115,10 @@ dependencies {
 //	implementation (libs.play.services.ads)
 	
 //	// --- Firebase ---
+	implementation(platform(libs.firebase.bom.v3300))
+	// 2. Agrega la librería SIN versión (el BoM se la asigna)
+	implementation(libs.google.firebase.crashlytics.ktx)
+//	implementation(libs.firebase.crashlytics.ktx)
 //	implementation(platform(libs.firebase.bom))
 //	implementation(libs.firebase.analytics)
 //	implementation(libs.firebase.messaging)

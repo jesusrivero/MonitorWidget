@@ -9,6 +9,7 @@ coreKtxVersion = "1.13.1"
 coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.7"
 firebaseBom = "34.2.0"
+firebaseBomVersion = "33.0.0"
 glanceAppwidget = "1.1.1"
 hiltAndroid = "2.52"
 hiltCompiler = "2.52"
@@ -44,16 +45,21 @@ workRuntimeKtx = "2.10.1"
 workRuntimeKtxVersion = "2.9.0"
 navigationComposeAndroid = "2.9.3"
 
-[libraries]
 
+
+[libraries]
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBomVersion" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ktx" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx" }
 androidx-core-ktx-v1170 = { module = "androidx.core:core-ktx", version.ref = "androidxCoreKtx" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltWork" }
 androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
 androidx-work-runtime-ktx-v290 = { module = "androidx.work:work-runtime-ktx", version.ref = "androidxWorkRuntimeKtx" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.1.2" }
-firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx" }
+firebase-bom-v3300 = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBomVersion" }
+firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging-ktx" }
 google-firebase-common-ktx = { module = "com.google.firebase:firebase-common-ktx" }
+google-firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 

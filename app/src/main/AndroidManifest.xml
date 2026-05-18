@@ -9,9 +9,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <!-- Recomendado en Android 14+ para trabajos de sync/datos -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- Android 12+ requiere este permiso para setExactAndAllowWhileIdle -->
+<!--    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />-->
 
     <application
-        android:name=".MyApp"
+        android:name="com.example.monitorwidget.MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -22,7 +26,7 @@
         android:theme="@style/Theme.MonitorWidget"
         tools:targetApi="31">
         <activity
-            android:name=".infraestructure.MainActivity"
+            android:name="com.example.monitorwidget.infraestructure.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.MonitorWidget">
@@ -34,7 +38,7 @@
         </activity>
 
         <receiver
-            android:name=".presentation.monitor_widget.MonitorWidgetReceiver"
+            android:name="com.example.monitorwidget.presentation.monitor_widget.MonitorWidgetReceiver"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
@@ -44,7 +48,7 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/monitor_widget_info" />
         </receiver>
-        <!-- 👇 Aquí agregas el provider -->
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -55,7 +59,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Desactiva el inicializador por defecto de WorkManager (AndroidX Startup) -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
@@ -67,6 +70,19 @@
                 android:value="androidx.startup"
                 tools:node="remove" />
         </provider>
+
+        <receiver
+            android:name="com.example.monitorwidget.data.remote.local.datastore.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="com.example.monitorwidget.data.remote.local.datastore.NotificationAlarmReceiver"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -7,7 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-// ✅ Forma correcta con delegate
+
 val Context.dataStore by preferencesDataStore(name = "settings")
 
 class ThemeDataStore(private val context: Context) {

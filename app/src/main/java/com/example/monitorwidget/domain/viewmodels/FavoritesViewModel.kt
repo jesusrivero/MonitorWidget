@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 
-
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
 	private val getFavoritesUseCase: GetFavoritesUseCase,
@@ -42,10 +41,16 @@ class FavoritesViewModel @Inject constructor(
 		}
 	}
 	
-	fun addFavorite(name: String, amountUsd: Double) {
+	fun addFavorite(name: String, amountUsd: Double, currency: String = "USD") {  // ← agrega currency
 		viewModelScope.launch {
 			try {
-				addFavoriteUseCase(FavoriteAmountEntity(name = name, amountUsd = amountUsd))
+				addFavoriteUseCase(
+					FavoriteAmountEntity(
+						name      = name,
+						amountUsd = amountUsd,
+						currency  = currency   // ← pasa currency
+					)
+				)
 				_uiState.update { it.copy(message = "✅ Favorito agregado con éxito") }
 			} catch (e: Exception) {
 				_uiState.update { it.copy(error = e.message) }
@@ -67,7 +72,7 @@ class FavoritesViewModel @Inject constructor(
 	fun updateFavorite(favorite: FavoriteAmountEntity) {
 		viewModelScope.launch {
 			try {
-				updateFavoriteUseCase(favorite)
+				updateFavoriteUseCase(favorite)  // ya trae currency dentro del objeto
 				_uiState.update { it.copy(message = "✏️ Favorito actualizado") }
 			} catch (e: Exception) {
 				_uiState.update { it.copy(error = e.message) }
@@ -75,11 +80,7 @@ class FavoritesViewModel @Inject constructor(
 		}
 	}
 	
-	
-	// Para limpiar mensajes después de mostrarlos
 	fun clearMessage() {
 		_uiState.update { it.copy(message = null, error = null) }
 	}
 }
-
-

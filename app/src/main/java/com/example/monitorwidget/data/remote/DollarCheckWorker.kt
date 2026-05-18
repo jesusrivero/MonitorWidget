@@ -8,69 +8,76 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
+import androidx.work.Constraints
 import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ForegroundInfo
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.example.monitorwidget.R
 import com.example.monitorwidget.data.remote.local.datastore.DollarDataStore
 import com.example.monitorwidget.domain.repository.DollarRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.util.concurrent.TimeUnit
+
 
 @HiltWorker
 class DollarCheckWorker @AssistedInject constructor(
 	@Assisted context: Context,
 	@Assisted workerParams: WorkerParameters,
 	private val repository: DollarRepository,
-	private val dataStore: DollarDataStore
+	private val dataStore: DollarDataStore,
 ) : CoroutineWorker(context, workerParams) {
-	
+	val lastRates = dataStore.getRates()
 	private val fgChannelId = "rate_watch_fg"
 	private val fgNotifId = 2001
 	
 	override suspend fun doWork(): Result {
-		// Solo entrar a foreground si este run viene marcado como expedited
-		val isExpedited = inputData.getBoolean("expedited", false)
-		if (isExpedited) {
-			setForeground(getForegroundInfo())
-		}
-		
-		Log.d("DollarWorker", "🔄 Ejecutando Worker...")
+		Log.d(TAG, "Ejecutando DollarCheckWorker...")
 		
 		return try {
-			// 1) Leer el último valor ANTES de pedir el nuevo
-			val lastRates = dataStore.getRates()
 			
-			// 2) Obtener el nuevo valor (tu repo ya guarda en DataStore al traer)
+			val lastRates = dataStore.getRates()
 			val newRates = repository.getDollarRates()
 			
-			Log.d(
-				"DollarWorker",
-				"📊 Último=${lastRates?.bcv} → Nuevo=${newRates.bcv}"
-			)
+			Log.d(TAG, "Último=${lastRates?.bcv} → Nuevo=${newRates.bcv}")
 			
-			// 3) Comparar contra el valor leido ANTES de fetch
-			val changed = lastRates == null ||
-					kotlin.math.abs(newRates.bcv - lastRates.bcv) >= 0.01  // umbral 0.01 Bs
+			val lastBcv = lastRates?.bcv
+				?.toBigDecimal()
+				?.setScale(2, RoundingMode.HALF_UP)
+				?: BigDecimal.ZERO
+			
+			val newBcv = newRates.bcv
+				.toBigDecimal()
+				.setScale(2, RoundingMode.HALF_UP)
+			
+			val threshold = BigDecimal("0.01")
+			val changed = lastRates == null || (newBcv - lastBcv).abs() >= threshold
 			
 			if (changed) {
+				Log.d(TAG, "Cambio detectado: $lastBcv → $newBcv")
 				showChangeNotification(newRates.bcv)
 			} else {
-				Log.d("DollarWorker", "✅ Sin cambios relevantes, no se notifica.")
+				Log.d(TAG, "Sin cambios relevantes, no se notifica.")
 			}
 			
 			Result.success()
 		} catch (t: Throwable) {
-			Log.e("DollarWorker", "❌ Error en Worker", t)
+			Log.e(TAG, "Error en DollarCheckWorker", t)
 			Result.retry()
 		}
 	}
 	
-	// Se usará solo cuando encoles expedited=true (aquí no lo haremos)
+	@RequiresApi(Build.VERSION_CODES.O)
 	override suspend fun getForegroundInfo(): ForegroundInfo {
 		ensureChannel(fgChannelId, "Monitoreo del dólar")
 		val notif = NotificationCompat.Builder(applicationContext, fgChannelId)
-			.setSmallIcon(R.drawable.ic_logo_splash) // tu ícono
+			.setSmallIcon(R.drawable.ic_logo_splash)
 			.setContentTitle("Monitoreando precio del dólar")
 			.setContentText("Comprobando cambios de BCV/USDT/Promedio…")
 			.setOngoing(true)
@@ -83,22 +90,50 @@ class DollarCheckWorker @AssistedInject constructor(
 		val channelId = "dollar_channel"
 		ensureChannel(channelId, "Actualizaciones del dólar")
 		
+		
+		val formattedPrice = "%.2f".format(price)
+		
 		val notification = NotificationCompat.Builder(applicationContext, channelId)
 			.setContentTitle("💵 Precio del dólar BCV")
-			.setContentText("El BCV ahora está en: $price Bs")
+			.setContentText("El BCV ahora está en: $formattedPrice Bs")
 			.setSmallIcon(R.drawable.ic_logo_splash)
 			.setAutoCancel(true)
+			.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 			.build()
 		
-		val nm = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-		nm.notify(1001, notification)
+		val nm =
+			applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+		nm.notify(NOTIF_ID_CHANGE, notification)
 	}
 	
 	private fun ensureChannel(id: String, name: String) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			val nm = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-			val ch = NotificationChannel(id, name, NotificationManager.IMPORTANCE_LOW)
+			val nm =
+				applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+			val ch = NotificationChannel(id, name, NotificationManager.IMPORTANCE_DEFAULT)
 			nm.createNotificationChannel(ch)
+		}
+	}
+	
+	companion object {
+		private const val TAG = "DollarCheckWorker"
+		private const val NOTIF_ID_CHANGE = 1001
+		
+		fun enqueue(context: Context) {
+			val request = PeriodicWorkRequestBuilder<DollarCheckWorker>(30, TimeUnit.MINUTES)
+				.setConstraints(
+					Constraints.Builder()
+						.setRequiredNetworkType(NetworkType.CONNECTED)
+						.setRequiresBatteryNotLow(false)
+						.build()
+				)
+				.build()
+			
+			WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+				"DollarCheck",
+				ExistingPeriodicWorkPolicy.KEEP,
+				request
+			)
 		}
 	}
 }

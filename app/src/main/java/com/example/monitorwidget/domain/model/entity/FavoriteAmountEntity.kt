@@ -8,5 +8,6 @@ data class FavoriteAmountEntity(
 	@PrimaryKey(autoGenerate = true)
 	val id: Int = 0,
 	val name: String,
-	val amountUsd: Double
+	val amountUsd: Double,
+	val currency: String = "USD"  // ← nuevo: "USD" o "EUR"
 )

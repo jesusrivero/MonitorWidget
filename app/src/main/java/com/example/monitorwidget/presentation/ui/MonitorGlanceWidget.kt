@@ -60,9 +60,8 @@ class MonitorGlanceWidget : GlanceAppWidget() {
 @SuppressLint("RestrictedApi")
 @Composable
 fun MonitorWidgetContent(rates: DollarRates?) {
-	val formatter = DecimalFormat("#,##0.00")
-	// ✅ Cambio aquí: formato de 12 horas con AM/PM
-	val timeFormatter = SimpleDateFormat("h:mm a", Locale.getDefault())
+	val formatter      = DecimalFormat("#,##0.00")
+	val timeFormatter  = SimpleDateFormat("h:mm a", Locale.getDefault())
 	
 	Column(
 		modifier = GlanceModifier
@@ -71,51 +70,96 @@ fun MonitorWidgetContent(rates: DollarRates?) {
 			.background(ColorProvider(Color(0xFFEFEFEF)))
 			.cornerRadius(12.dp)
 			.padding(10.dp)
-			.clickable(actionStartActivity<MainActivity>()), // 👈 Tocar fuera de botones abre la app normal
+			.clickable(actionStartActivity<MainActivity>()),
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
-		// Header
+
 		Text(
-			text = "💵 Dólar BCV",
+			text  = "Monitor BCV",
 			style = TextStyle(
 				fontWeight = FontWeight.Bold,
-				fontSize = 14.sp,
-				color = ColorProvider(Color(0xFF333333))
+				fontSize   = 14.sp,
+				color      = ColorProvider(Color(0xFF333333))
 			)
 		)
 		
-		Spacer(GlanceModifier.height(12.dp))
+		Spacer(GlanceModifier.height(10.dp))
 		
 		if (rates != null) {
-			Column(
+			Row(
+				modifier = GlanceModifier.fillMaxWidth(),
 				horizontalAlignment = Alignment.CenterHorizontally
 			) {
-				Text(
-					text = "Bs. ${formatter.format(rates.bcv)}",
-					style = TextStyle(
-						fontSize = 18.sp,
-						fontWeight = FontWeight.Bold,
-						color = ColorProvider(Color(0xFF2563EB))
+				Column(
+					modifier            = GlanceModifier.defaultWeight(),
+					horizontalAlignment = Alignment.CenterHorizontally
+				) {
+					Text(
+						text  = "💵 USD",
+						style = TextStyle(
+							fontSize = 10.sp,
+							color    = ColorProvider(Color(0xFF888888))
+						)
 					)
+					Spacer(GlanceModifier.height(2.dp))
+					Text(
+						text  = "Bs. ${formatter.format(rates.bcv)}",
+						style = TextStyle(
+							fontSize   = 15.sp,
+							fontWeight = FontWeight.Bold,
+							color      = ColorProvider(Color(0xFF2563EB))
+						)
+					)
+				}
+				
+				Spacer(
+					modifier = GlanceModifier
+						.width(1.dp)
+						.height(36.dp)
+						.background(ColorProvider(Color(0xFFCCCCCC)))
 				)
+				
+				Column(
+					modifier            = GlanceModifier.defaultWeight(),
+					horizontalAlignment = Alignment.CenterHorizontally
+				) {
+					Text(
+						text  = "💶 EUR",
+						style = TextStyle(
+							fontSize = 10.sp,
+							color    = ColorProvider(Color(0xFF888888))
+						)
+					)
+					Spacer(GlanceModifier.height(2.dp))
+					Text(
+						text  = if (rates.eur > 0.0) "Bs. ${formatter.format(rates.eur)}"
+						else     "N/D",
+						style = TextStyle(
+							fontSize   = 15.sp,
+							fontWeight = FontWeight.Bold,
+							color      = ColorProvider(Color(0xFF2563EB))
+						)
+					)
+				}
 			}
 			
-			Spacer(GlanceModifier.height(10.dp))
+			Spacer(GlanceModifier.height(8.dp))
 			
 			Text(
-				text = "🕒 Actualizado: ${timeFormatter.format(Date(rates.timestamp * 1000))}",
+				text  = "🕒 ${timeFormatter.format(Date(rates.timestamp * 1000))}",
 				style = TextStyle(
 					fontSize = 10.sp,
-					color = ColorProvider(Color(0xFF888888))
+					color    = ColorProvider(Color(0xFF888888))
 				)
 			)
+			
 		} else {
 			Text(
-				text = "⚠️ Sin conexión",
+				text  = "⚠️ Sin conexión",
 				style = TextStyle(
 					fontWeight = FontWeight.Medium,
-					fontSize = 12.sp,
-					color = ColorProvider(Color(0xFFDC2626))
+					fontSize   = 12.sp,
+					color      = ColorProvider(Color(0xFFDC2626))
 				)
 			)
 		}
@@ -128,12 +172,11 @@ fun MonitorWidgetContent(rates: DollarRates?) {
 				.padding(horizontal = 8.dp),
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
-			// 🔄 Botón de actualizar
 			Box(
 				modifier = GlanceModifier
-					.width(80.dp)
+					.width(100.dp)
 					.height(36.dp)
-					.background(ColorProvider(Color(0xDD10B981))) // Verde
+					.background(ColorProvider(Color(0xDD10B981)))
 					.cornerRadius(18.dp)
 					.clickable(actionRunCallback<RefreshAction>()),
 				contentAlignment = Alignment.Center
@@ -141,18 +184,15 @@ fun MonitorWidgetContent(rates: DollarRates?) {
 				Row(
 					modifier = GlanceModifier.padding(horizontal = 8.dp),
 					horizontalAlignment = Alignment.CenterHorizontally,
-					verticalAlignment = Alignment.CenterVertically
+					verticalAlignment   = Alignment.CenterVertically
 				) {
-					Text(
-						"🔄",
-						style = TextStyle(fontSize = 14.sp)
-					)
+					Text("🔄", style = TextStyle(fontSize = 14.sp))
 					Spacer(GlanceModifier.width(4.dp))
 					Text(
-						"Act",
+						"Actualizar",
 						style = TextStyle(
-							fontSize = 11.sp,
-							color = ColorProvider(Color.White),
+							fontSize   = 11.sp,
+							color      = ColorProvider(Color.White),
 							fontWeight = FontWeight.Medium
 						)
 					)
@@ -161,12 +201,11 @@ fun MonitorWidgetContent(rates: DollarRates?) {
 			
 			Spacer(GlanceModifier.width(8.dp))
 			
-			// ⭐ Botón de favoritos
 			Box(
 				modifier = GlanceModifier
-					.width(80.dp)
+					.width(100.dp)
 					.height(36.dp)
-					.background(ColorProvider(Color(0xCEEAB319))) // Amarillo/dorado
+					.background(ColorProvider(Color(0xCEEAB319)))
 					.cornerRadius(18.dp)
 					.clickable(
 						actionStartActivity(
@@ -181,18 +220,15 @@ fun MonitorWidgetContent(rates: DollarRates?) {
 				Row(
 					modifier = GlanceModifier.padding(horizontal = 8.dp),
 					horizontalAlignment = Alignment.CenterHorizontally,
-					verticalAlignment = Alignment.CenterVertically
+					verticalAlignment   = Alignment.CenterVertically
 				) {
-					Text(
-						"💡",
-						style = TextStyle(fontSize = 14.sp)
-					)
+					Text("💡", style = TextStyle(fontSize = 14.sp))
 					Spacer(GlanceModifier.width(4.dp))
 					Text(
-						"Rec",
+						"Recurrentes",
 						style = TextStyle(
-							fontSize = 11.sp,
-							color = ColorProvider(Color.White),
+							fontSize   = 11.sp,
+							color      = ColorProvider(Color.White),
 							fontWeight = FontWeight.Medium
 						)
 					)
@@ -202,15 +238,3 @@ fun MonitorWidgetContent(rates: DollarRates?) {
 	}
 }
 
-@Composable
-@Preview
-fun MonitorWidgetContentPreview(){
-	MonitorWidgetTheme {
-		MonitorWidgetContent(
-			rates = DollarRates(
-				bcv = 10.0,
-				timestamp = 10L
-			)
-		)
-	}
-}

@@ -1,7 +1,7 @@
 package com.example.monitorwidget.presentation.ui
 
 
-
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +44,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +52,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -64,25 +66,28 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.monitorwidget.domain.model.enums.FavoriteSuggestion
-import com.example.monitorwidget.domain.model.enums.NavigationRoute
 import com.example.monitorwidget.domain.model.DollarRates
 import com.example.monitorwidget.domain.model.entity.FavoriteAmountEntity
+import com.example.monitorwidget.domain.model.enums.FavoriteSuggestion
 import com.example.monitorwidget.domain.model.enums.FavoritesUiState
+import com.example.monitorwidget.domain.model.enums.NavigationRoute
 import com.example.monitorwidget.domain.viewmodels.FavoritesViewModel
-import java.text.DecimalFormat
 import com.example.monitorwidget.presentation.ui.commons.DrawerScaffold
+import com.example.monitorwidget.presentation.utils.formatLiveInput
 import com.example.monitorwidget.presentation.utils.getSuggestedFavorites
 import com.example.monitorwidget.ui.theme.domain.model.viewmodel.DollarViewModel
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,15 +100,11 @@ fun FavoriteScreen(
 	val isRatesLoading by dollarViewModel.isLoading.collectAsState()
 	val rates = dollarViewModel.rates.collectAsState()
 	val uiState by favoritesViewModel.uiState.collectAsState()
-	
-
 	var dialogState by remember { mutableStateOf<FavoriteDialogState>(FavoriteDialogState.Hidden) }
-	
 	val snackbarHostState = remember { SnackbarHostState() }
 	val coroutineScope = rememberCoroutineScope()
 	val clipboardManager = LocalClipboardManager.current
 	
-
 	fun showCreateDialog() {
 		dialogState = FavoriteDialogState.Create()
 	}
@@ -123,7 +124,6 @@ fun FavoriteScreen(
 		)
 	}
 	
-	// Mostrar snackbar con mensajes o errores
 	LaunchedEffect(uiState.message, uiState.error) {
 		uiState.message?.let {
 			coroutineScope.launch { snackbarHostState.showSnackbar(it) }
@@ -135,7 +135,6 @@ fun FavoriteScreen(
 		}
 	}
 	
-
 	DrawerScaffold(
 		currentRoute = NavigationRoute.LIVE_RATES,
 		navController = navController,
@@ -152,8 +151,7 @@ fun FavoriteScreen(
 				navigationIcon = {
 					IconButton(onClick = { scope.launch { drawerState.open() } }) {
 						Icon(
-							imageVector = Icons.Default.Menu,
-							contentDescription = "Abrir menú",
+							Icons.Default.Menu, "Abrir menú",
 							tint = MaterialTheme.colorScheme.onPrimary
 						)
 					}
@@ -161,8 +159,7 @@ fun FavoriteScreen(
 				actions = {
 					IconButton(onClick = { dollarViewModel.fetchRates() }) {
 						Icon(
-							imageVector = Icons.Default.Refresh,
-							contentDescription = "Refrescar",
+							Icons.Default.Refresh, "Refrescar",
 							tint = MaterialTheme.colorScheme.onPrimary
 						)
 					}
@@ -187,7 +184,7 @@ fun FavoriteScreen(
 				isRatesLoading = isRatesLoading,
 				onDeleteFavorite = { favoritesViewModel.deleteFavorite(it) },
 				onCopyAmount = { amountBs ->
-					clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(amountBs))
+					clipboardManager.setText(AnnotatedString(amountBs))
 					coroutineScope.launch {
 						snackbarHostState.showSnackbar("📋 Monto copiado al portapapeles")
 					}
@@ -204,23 +201,18 @@ fun FavoriteScreen(
 		}
 	}
 	
-	// Diálogo de crear/editar favorito
 	FavoriteDialog(
 		state = dialogState,
-		currentRate = rates.value?.bcv ?: 0.0,
+		currentBcv = rates.value?.bcv ?: 0.0,
+		currentEur = rates.value?.eur ?: 0.0,
 		onDismiss = { hideDialog() },
-		onConfirm = { name, amount ->
+		onConfirm = { name, amount, currency ->
 			when (val state = dialogState) {
-				is FavoriteDialogState.Create -> {
-					favoritesViewModel.addFavorite(name, amount)
-				}
-				is FavoriteDialogState.Edit -> {
-					val updatedFavorite = state.favorite.copy(
-						name = name,
-						amountUsd = amount
-					)
-					favoritesViewModel.updateFavorite(updatedFavorite)
-				}
+				is FavoriteDialogState.Create -> favoritesViewModel.addFavorite(name, amount, currency)
+				is FavoriteDialogState.Edit -> favoritesViewModel.updateFavorite(
+					state.favorite.copy(name = name, amountUsd = amount, currency = currency)
+				)
+				
 				FavoriteDialogState.Hidden -> {}
 			}
 			hideDialog()
@@ -233,41 +225,35 @@ private fun FavoriteContent(
 	modifier: Modifier = Modifier,
 	rates: DollarRates?,
 	uiState: FavoritesUiState,
-	isRatesLoading: Boolean, // ✅ nuevo parámetro
+	isRatesLoading: Boolean,
 	onRetryRates: () -> Unit,
 	onAddFavoriteClick: () -> Unit,
 	onEditFavorite: (FavoriteAmountEntity) -> Unit,
 	onDeleteFavorite: (FavoriteAmountEntity) -> Unit,
 	onCopyAmount: (String) -> Unit,
-	onSuggestionClick: (FavoriteSuggestion) -> Unit
+	onSuggestionClick: (FavoriteSuggestion) -> Unit,
 ) {
 	Column(
 		modifier = modifier.verticalScroll(rememberScrollState()),
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
 		if (rates == null) {
-			if (isRatesLoading) { // ✅ usamos el estado del DollarViewModel
-				CircularProgressIndicator(
-					modifier = Modifier.padding(32.dp)
-				)
+			if (isRatesLoading) {
+				CircularProgressIndicator(modifier = Modifier.padding(32.dp))
 			} else {
-				ErrorState(
-					message = "No hay tasas disponibles",
-					onRetry = onRetryRates
-				)
+				ErrorState(message = "No hay tasas disponibles", onRetry = onRetryRates)
 			}
 			return@Column
 		}
 		
-	
-		CurrentRateCard(rate = rates.bcv)
+		CurrentRatesCard(bcv = rates.bcv, eur = rates.eur)
 		
 		Spacer(modifier = Modifier.height(24.dp))
 		
-
 		FavoriteSection(
 			uiState = uiState,
-			rate = rates.bcv,
+			bcv = rates.bcv,
+			eur = rates.eur,
 			onAddClick = onAddFavoriteClick,
 			onEdit = onEditFavorite,
 			onDelete = onDeleteFavorite,
@@ -276,7 +262,6 @@ private fun FavoriteContent(
 		
 		Spacer(modifier = Modifier.height(24.dp))
 		
-		
 		if (uiState.favorites.isEmpty() && !uiState.isLoading) {
 			SuggestionsSection(onSuggestionClick = onSuggestionClick)
 		}
@@ -284,7 +269,9 @@ private fun FavoriteContent(
 }
 
 @Composable
-private fun CurrentRateCard(rate: Double) {
+private fun CurrentRatesCard(bcv: Double, eur: Double) {
+	val formatter = DecimalFormat("#,##0.00")
+	
 	Card(
 		modifier = Modifier.fillMaxWidth(),
 		shape = RoundedCornerShape(16.dp),
@@ -292,35 +279,56 @@ private fun CurrentRateCard(rate: Double) {
 			containerColor = MaterialTheme.colorScheme.primaryContainer
 		)
 	) {
-		Column(
+		Row(
 			modifier = Modifier
 				.fillMaxWidth()
 				.padding(vertical = 16.dp, horizontal = 24.dp),
-			horizontalAlignment = Alignment.CenterHorizontally,
-			verticalArrangement = Arrangement.spacedBy(4.dp)
+			horizontalArrangement = Arrangement.SpaceEvenly
 		) {
-			Text(
-				text = "💱 Tasa Actual BCV",
-				style = MaterialTheme.typography.titleLarge,
-				fontWeight = FontWeight.Bold,
-				fontSize = 20.sp
+			Column(horizontalAlignment = Alignment.CenterHorizontally) {
+				Text(
+					"💵 USD", style = MaterialTheme.typography.labelLarge,
+					fontWeight = FontWeight.Bold
+				)
+				Spacer(Modifier.height(4.dp))
+				Text(
+					text = "${formatter.format(bcv)} Bs",
+					style = MaterialTheme.typography.titleLarge,
+					fontWeight = FontWeight.Bold,
+					color = MaterialTheme.colorScheme.primary
+				)
+				Text(
+					text = "Por cada $1",
+					style = MaterialTheme.typography.bodySmall,
+					color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+				)
+			}
+			
+			HorizontalDivider(
+				modifier = Modifier
+					.height(60.dp)
+					.width(1.dp),
+				color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f)
 			)
 			
-			val formatter = DecimalFormat("#,##0.00")
-			Text(
-				text = "${formatter.format(rate)} Bs",
-				style = MaterialTheme.typography.headlineMedium,
-				fontWeight = FontWeight.Bold,
-				fontSize = 28.sp,
-				color = MaterialTheme.colorScheme.primary
-			)
-			
-			Text(
-				text = "Por cada $1 USD",
-				style = MaterialTheme.typography.bodyMedium,
-				color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-				fontSize = 15.sp
-			)
+			Column(horizontalAlignment = Alignment.CenterHorizontally) {
+				Text(
+					"💶 EUR", style = MaterialTheme.typography.labelLarge,
+					fontWeight = FontWeight.Bold
+				)
+				Spacer(Modifier.height(4.dp))
+				Text(
+					text = if (eur > 0) "${formatter.format(eur)} Bs" else "N/D",
+					style = MaterialTheme.typography.titleLarge,
+					fontWeight = FontWeight.Bold,
+					color = MaterialTheme.colorScheme.primary
+				)
+				Text(
+					text = "Por cada €1",
+					style = MaterialTheme.typography.bodySmall,
+					color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+				)
+			}
 		}
 	}
 }
@@ -328,13 +336,13 @@ private fun CurrentRateCard(rate: Double) {
 @Composable
 private fun FavoriteSection(
 	uiState: FavoritesUiState,
-	rate: Double,
+	bcv: Double,
+	eur: Double,
 	onAddClick: () -> Unit,
 	onEdit: (FavoriteAmountEntity) -> Unit,
 	onDelete: (FavoriteAmountEntity) -> Unit,
-	onCopy: (String) -> Unit
+	onCopy: (String) -> Unit,
 ) {
-
 	Row(
 		modifier = Modifier.fillMaxWidth(),
 		horizontalArrangement = Arrangement.SpaceBetween,
@@ -345,17 +353,12 @@ private fun FavoriteSection(
 			style = MaterialTheme.typography.titleLarge,
 			fontWeight = FontWeight.Bold
 		)
-		
 		IconButton(
 			onClick = onAddClick,
-			modifier = Modifier.background(
-				MaterialTheme.colorScheme.primary,
-				CircleShape
-			)
+			modifier = Modifier.background(MaterialTheme.colorScheme.primary, CircleShape)
 		) {
 			Icon(
-				imageVector = Icons.Default.Add,
-				contentDescription = "Agregar gasto recurrente",
+				Icons.Default.Add, "Agregar",
 				tint = MaterialTheme.colorScheme.onPrimary
 			)
 		}
@@ -363,23 +366,17 @@ private fun FavoriteSection(
 	
 	Spacer(modifier = Modifier.height(16.dp))
 	
-	
 	when {
-		uiState.isLoading -> {
-			LoadingState()
-		}
-		uiState.favorites.isEmpty() -> {
-			EmptyFavoritesState()
-		}
-		else -> {
-			FavoritesList(
-				favorites = uiState.favorites,
-				rate = rate,
-				onEdit = onEdit,
-				onDelete = onDelete,
-				onCopy = onCopy
-			)
-		}
+		uiState.isLoading -> LoadingState()
+		uiState.favorites.isEmpty() -> EmptyFavoritesState()
+		else -> FavoritesList(
+			favorites = uiState.favorites,
+			bcv = bcv,
+			eur = eur,
+			onEdit = onEdit,
+			onDelete = onDelete,
+			onCopy = onCopy
+		)
 	}
 }
 
@@ -435,21 +432,23 @@ private fun EmptyFavoritesState() {
 @Composable
 private fun FavoritesList(
 	favorites: List<FavoriteAmountEntity>,
-	rate: Double,
+	bcv: Double,
+	eur: Double,
 	onEdit: (FavoriteAmountEntity) -> Unit,
 	onDelete: (FavoriteAmountEntity) -> Unit,
-	onCopy: (String) -> Unit
+	onCopy: (String) -> Unit,
 ) {
 	LazyColumn(
 		modifier = Modifier
 			.fillMaxWidth()
-			.heightIn(max = 400.dp),
+			.heightIn(max = 500.dp),
 		verticalArrangement = Arrangement.spacedBy(8.dp)
 	) {
 		items(favorites, key = { it.id }) { favorite ->
 			FavoriteCard(
 				favorite = favorite,
-				rate = rate,
+				bcv = bcv,
+				eur = eur,
 				onEdit = { onEdit(favorite) },
 				onDelete = { onDelete(favorite) },
 				onCopy = onCopy
@@ -460,7 +459,7 @@ private fun FavoritesList(
 
 @Composable
 private fun SuggestionsSection(
-	onSuggestionClick: (FavoriteSuggestion) -> Unit
+	onSuggestionClick: (FavoriteSuggestion) -> Unit,
 ) {
 	Text(
 		text = "💭 Sugerencias populares",
@@ -489,20 +488,22 @@ private fun SuggestionsSection(
 	}
 }
 
-
-
 @Composable
 fun FavoriteCard(
 	favorite: FavoriteAmountEntity,
-	rate: Double,
+	bcv: Double,
+	eur: Double,
 	onEdit: (FavoriteAmountEntity) -> Unit,
 	onDelete: (FavoriteAmountEntity) -> Unit,
-	onCopy: (String) -> Unit
+	onCopy: (String) -> Unit,
 ) {
 	val formatter = DecimalFormat("#,##0.00")
+	val isEur = favorite.currency == "EUR"
+	val rate = if (isEur) eur else bcv
+	val symbol = if (isEur) "€" else "$"
+	val flag = if (isEur) "💶" else "💵"
 	
-	// Formateo en USD y en Bs
-	val usdFormatted = formatter.format(favorite.amountUsd)
+	val amountFormatted = formatter.format(favorite.amountUsd)
 	val bolivares = favorite.amountUsd * rate
 	val bolivaresFormatted = formatter.format(bolivares)
 	
@@ -521,70 +522,88 @@ fun FavoriteCard(
 			horizontalArrangement = Arrangement.SpaceBetween,
 			verticalAlignment = Alignment.CenterVertically
 		) {
-		
 			Column(
 				modifier = Modifier
 					.weight(1f)
 					.padding(end = 8.dp)
 			) {
+				Row(
+					verticalAlignment = Alignment.CenterVertically,
+					horizontalArrangement = Arrangement.spacedBy(6.dp)
+				) {
+					Text(
+						text = "💡 ${favorite.name}",
+						style = MaterialTheme.typography.bodyLarge,
+						fontWeight = FontWeight.SemiBold,
+						maxLines = 1,
+						overflow = TextOverflow.Ellipsis,
+						modifier = Modifier.weight(1f, fill = false)
+					)
+					
+					Surface(
+						shape = RoundedCornerShape(6.dp),
+						color = MaterialTheme.colorScheme.secondaryContainer
+					) {
+						Text(
+							text = "$flag ${favorite.currency}",
+							modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+							style = MaterialTheme.typography.labelSmall,
+							fontWeight = FontWeight.Bold,
+							color = MaterialTheme.colorScheme.onSecondaryContainer
+						)
+					}
+				}
+				
+				Spacer(modifier = Modifier.height(2.dp))
+				
 				
 				Text(
-					text = "💡 ${favorite.name} - $$usdFormatted USD",
-					style = MaterialTheme.typography.bodyLarge,
-					fontWeight = FontWeight.SemiBold,
-					color = MaterialTheme.colorScheme.onSurface,
-					maxLines = 1,
-					overflow = TextOverflow.Ellipsis
+					text = "$symbol$amountFormatted ${favorite.currency}",
+					style = MaterialTheme.typography.bodySmall,
+					color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
 				)
 				
 				Spacer(modifier = Modifier.height(4.dp))
 				
-
+				
 				Text(
 					text = "$bolivaresFormatted Bs",
 					style = MaterialTheme.typography.bodyMedium,
 					fontWeight = FontWeight.Bold,
-					color = MaterialTheme.colorScheme.primary,
-					maxLines = 1,
-					overflow = TextOverflow.Ellipsis
+					color = MaterialTheme.colorScheme.primary
 				)
 			}
 			
-
-			Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+			
+			Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
 				IconButton(
 					onClick = { onCopy(bolivaresFormatted) },
-					modifier = Modifier.size(40.dp)
+					modifier = Modifier.size(38.dp)
 				) {
 					Icon(
-						imageVector = Icons.Default.ContentCopy,
-						contentDescription = "Copiar monto",
+						Icons.Default.ContentCopy, "Copiar",
 						tint = MaterialTheme.colorScheme.primary,
-						modifier = Modifier.size(18.dp)
+						modifier = Modifier.size(17.dp)
 					)
 				}
-				
 				IconButton(
 					onClick = { onEdit(favorite) },
-					modifier = Modifier.size(40.dp)
+					modifier = Modifier.size(38.dp)
 				) {
 					Icon(
-						imageVector = Icons.Default.Edit,
-						contentDescription = "Editar favorito",
+						Icons.Default.Edit, "Editar",
 						tint = MaterialTheme.colorScheme.secondary,
-						modifier = Modifier.size(18.dp)
+						modifier = Modifier.size(17.dp)
 					)
 				}
-				
 				IconButton(
 					onClick = { onDelete(favorite) },
-					modifier = Modifier.size(40.dp)
+					modifier = Modifier.size(38.dp)
 				) {
 					Icon(
-						imageVector = Icons.Default.Delete,
-						contentDescription = "Eliminar favorito",
+						Icons.Default.Delete, "Eliminar",
 						tint = MaterialTheme.colorScheme.error,
-						modifier = Modifier.size(18.dp)
+						modifier = Modifier.size(17.dp)
 					)
 				}
 			}
@@ -592,26 +611,13 @@ fun FavoriteCard(
 	}
 }
 
-
-
-
-
-
-sealed class FavoriteDialogState {
-	object Hidden : FavoriteDialogState()
-	data class Create(
-		val initialName: String = "",
-		val initialAmount: String = ""
-	) : FavoriteDialogState()
-	data class Edit(val favorite: FavoriteAmountEntity) : FavoriteDialogState()
-}
-
 @Composable
 fun FavoriteDialog(
 	state: FavoriteDialogState,
-	currentRate: Double,
+	currentBcv: Double,
+	currentEur: Double,
 	onDismiss: () -> Unit,
-	onConfirm: (name: String, amount: Double) -> Unit
+	onConfirm: (name: String, amount: Double, currency: String) -> Unit,
 ) {
 	if (state == FavoriteDialogState.Hidden) return
 	
@@ -624,7 +630,6 @@ fun FavoriteDialog(
 			}
 		)
 	}
-	
 	var favoriteAmount by remember(state) {
 		mutableStateOf(
 			when (state) {
@@ -634,85 +639,130 @@ fun FavoriteDialog(
 			}
 		)
 	}
+	var selectedCurrency by remember(state) {
+		mutableStateOf(
+			when (state) {
+				is FavoriteDialogState.Edit -> state.favorite.currency
+				else -> "USD"
+			}
+		)
+	}
+	
+	
+	var favoriteAmountRaw by remember(state) {
+		mutableStateOf(
+			when (state) {
+				is FavoriteDialogState.Create -> state.initialAmount
+				is FavoriteDialogState.Edit -> state.favorite.amountUsd.toString()
+				FavoriteDialogState.Hidden -> ""
+			}
+		)
+	}
+	val favoriteAmountDisplay = formatLiveInput(favoriteAmountRaw)
+	
+	val isEur = selectedCurrency == "EUR"
+	val activeRate = if (isEur) currentEur else currentBcv
+	val symbol = if (isEur) "€" else "$"
 	
 	val title = when (state) {
-		is FavoriteDialogState.Create -> "💡 Nuevo Favorito"
-		is FavoriteDialogState.Edit -> "✏️ Editar Favorito"
+		is FavoriteDialogState.Create -> "💡 Nuevo Recurrente"
+		is FavoriteDialogState.Edit -> "✏️ Editar Recurrente"
 		FavoriteDialogState.Hidden -> ""
 	}
-	
-	val confirmButtonText = when (state) {
-		is FavoriteDialogState.Create -> "Guardar"
-		is FavoriteDialogState.Edit -> "Actualizar"
-		FavoriteDialogState.Hidden -> ""
-	}
-	
 	val isValid = favoriteName.isNotBlank() &&
-			favoriteAmount.toDoubleOrNull()?.let { it > 0 } == true
+			favoriteAmountRaw.toDoubleOrNull()?.let { it > 0 } == true
 	
 	AlertDialog(
 		onDismissRequest = onDismiss,
 		containerColor = MaterialTheme.colorScheme.surfaceVariant,
 		title = {
-			Text(
-				text = title,
-				style = MaterialTheme.typography.titleLarge,
-				fontWeight = FontWeight.Bold
-			)
+			Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
 		},
 		text = {
-			Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+			Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+				
+				Surface(
+					shape = RoundedCornerShape(12.dp),
+					color = MaterialTheme.colorScheme.surface
+				) {
+					Row(
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(4.dp),
+						horizontalArrangement = Arrangement.spacedBy(4.dp)
+					) {
+						listOf("USD" to "💵 USD", "EUR" to "💶 EUR").forEach { (code, label) ->
+							val selected = selectedCurrency == code
+							val bgColor by animateColorAsState(
+								if (selected) MaterialTheme.colorScheme.primary
+								else Color.Transparent,
+								label = "currencyBg"
+							)
+							val textColor by animateColorAsState(
+								if (selected) MaterialTheme.colorScheme.onPrimary
+								else MaterialTheme.colorScheme.onSurfaceVariant,
+								label = "currencyText"
+							)
+							Surface(
+								onClick = { selectedCurrency = code },
+								shape = RoundedCornerShape(8.dp),
+								color = bgColor,
+								modifier = Modifier.weight(1f)
+							) {
+								Text(
+									text = label,
+									modifier = Modifier.padding(vertical = 8.dp),
+									style = MaterialTheme.typography.labelLarge,
+									fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+									color = textColor,
+									textAlign = TextAlign.Center
+								)
+							}
+						}
+					}
+				}
+				
 				OutlinedTextField(
 					value = favoriteName,
 					onValueChange = { favoriteName = it },
-					label = { Text("Nombre del favorito") },
-					placeholder = { Text("Ej: Alquiler, Netflix, Sueldo...") },
-					leadingIcon = {
-						Icon(
-							imageVector = Icons.Default.Label,
-							contentDescription = null
-						)
-					},
+					label = { Text("Nombre") },
+					placeholder = { Text("Ej: Alquiler, Netflix...") },
+					leadingIcon = { Icon(Icons.Default.Label, null) },
 					modifier = Modifier.fillMaxWidth(),
 					singleLine = true,
 					isError = favoriteName.isBlank()
 				)
 				
 				OutlinedTextField(
-					value = favoriteAmount,
-					onValueChange = { newValue ->
-						if (newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
-							favoriteAmount = newValue
+					value = favoriteAmountDisplay,
+					onValueChange = { input ->
+						val clean = input.replace(",", "").filter { it.isDigit() || it == '.' }
+						if (clean.count { it == '.' } <= 1) {
+							favoriteAmountRaw = clean
 						}
 					},
-					label = { Text("Monto en USD") },
+					label = { Text("Monto en $selectedCurrency") },
 					placeholder = { Text("0.00") },
 					leadingIcon = {
 						Text(
-							text = "$",
+							text = symbol,
 							style = MaterialTheme.typography.titleMedium,
-							color = MaterialTheme.colorScheme.primary
+							color = MaterialTheme.colorScheme.primary,
+							modifier = Modifier.padding(start = 12.dp)
 						)
 					},
 					modifier = Modifier.fillMaxWidth(),
 					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
 					singleLine = true,
-					isError = favoriteAmount.toDoubleOrNull()?.let { it <= 0 } != false
+					isError = favoriteAmountRaw.toDoubleOrNull()?.let { it <= 0 } != false
 				)
 				
-				
 				val previewAmount = favoriteAmount.toDoubleOrNull() ?: 0.0
-				if (previewAmount > 0 && currentRate > 0) {
+				if (previewAmount > 0 && activeRate > 0) {
 					val formatter = DecimalFormat("#,##0.00")
-					
-					val usdFormatted = formatter.format(previewAmount)
-					val bolivares = previewAmount * currentRate
-					val bolivaresFormatted = formatter.format(bolivares)
-					
 					Card(
-						modifier = Modifier.fillMaxWidth(),
 						colors = CardDefaults.cardColors(
-							containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+							containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
 						)
 					) {
 						Row(
@@ -720,17 +770,17 @@ fun FavoriteDialog(
 							verticalAlignment = Alignment.CenterVertically
 						) {
 							Icon(
-								imageVector = Icons.Default.Visibility,
-								contentDescription = null,
+								Icons.Default.Visibility, null,
 								tint = MaterialTheme.colorScheme.primary,
 								modifier = Modifier.size(16.dp)
 							)
-							Spacer(modifier = Modifier.width(8.dp))
+							Spacer(Modifier.width(8.dp))
 							Text(
-								text = "Vista previa: $$usdFormatted = $bolivaresFormatted Bs",
+								text = "$symbol${formatter.format(previewAmount)} = ${
+									formatter.format(previewAmount * activeRate)
+								} Bs",
 								style = MaterialTheme.typography.bodyMedium,
-								fontWeight = FontWeight.Medium,
-								color = MaterialTheme.colorScheme.onSurface
+								fontWeight = FontWeight.Medium
 							)
 						}
 					}
@@ -740,24 +790,31 @@ fun FavoriteDialog(
 		confirmButton = {
 			Button(
 				onClick = {
-					val amount = favoriteAmount.toDoubleOrNull()
+					val amount = favoriteAmountRaw.toDoubleOrNull()
 					if (favoriteName.isNotBlank() && amount != null && amount > 0) {
-						onConfirm(favoriteName.trim(), amount)
+						onConfirm(favoriteName.trim(), amount, selectedCurrency)
 					}
 				},
 				enabled = isValid
 			) {
-				Text(confirmButtonText)
+				Text(if (state is FavoriteDialogState.Edit) "Actualizar" else "Guardar")
 			}
 		},
 		dismissButton = {
-			TextButton(onClick = onDismiss) {
-				Text("Cancelar")
-			}
+			TextButton(onClick = onDismiss) { Text("Cancelar") }
 		}
 	)
 }
 
+sealed class FavoriteDialogState {
+	object Hidden : FavoriteDialogState()
+	data class Create(
+		val initialName: String = "",
+		val initialAmount: String = "",
+	) : FavoriteDialogState()
+	
+	data class Edit(val favorite: FavoriteAmountEntity) : FavoriteDialogState()
+}
 
 
 

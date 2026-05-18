@@ -4,6 +4,7 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class DolarApiItem(
+	val moneda: String? = null,
 	val fuente: String,
 	val nombre: String,
 	val compra: Double?,
@@ -17,7 +18,7 @@ data class DollarRates(
 	val timestamp: Long
 )
 
-// Para HexaRate (fuente de respaldo)
+
 @JsonClass(generateAdapter = true)
 data class HexaRateResponse(
 	val status_code: Int,
@@ -32,3 +33,4 @@ data class HexaRateData(
 	val unit: Int,
 	val timestamp: String
 )
+
